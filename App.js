@@ -1,21 +1,33 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React,{ useState } from 'react';
+import { StyleSheet, Text, View,Dimensions } from 'react-native';
+import HomeStackNav from './routes/stackRoute'
+import AppContext from './utils/ReducerContext'
 
 export default function App() {
+
+  const [money,setMoney] = useState(0)
+  const userSettings = {
+    money:money
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <AppContext.Provider value={userSettings}>
+      <View style={styles.container}>
+          <HomeStackNav/>
+      </View>
+    </AppContext.Provider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    width:Dimensions.get('window').width,
+    height:Dimensions.get('window').height,
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#D1C0B0',
+    borderColor:'#D1C0B0',
+    borderWidth:10,
+    borderStyle: 'solid',
+    paddingTop:10
   },
 });
