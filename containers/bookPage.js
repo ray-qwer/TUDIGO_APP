@@ -1,39 +1,58 @@
-import React from 'react';
-import { StyleSheet, Text, View, FlatList,TouchableOpacity, Image } from 'react-native';
+import React, { useEffect, useState, } from 'react';
+import { StyleSheet, Text, View, FlatList,TouchableOpacity, Image, AsyncStorage } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import globalStyle from '../styles/globalStyle'
+import imageReq from '../utils/images'
 
+// object:{
+//     pet:{
+//         id: number,
+//         source: string,
+//         level:  number,
+//         attribute:   number(0: water, 1: fire, 2: gress)
+//         identity:{
+//             attack:     number,
+//             defend:     number,
+//             recover:    number,
+//         },
+//         unlock: bool,
+//     }
+// }
 
 function BookPage({ navigation }){
-    const data = [
-        {
-            id:1,
-            title:"pet1",
-        },
-        {
-            id:2,
-            title:"pet2",
-        },
-        {
-            id:3,
-            title:"pet3",
-        },
-        {
-            id:4,
-            title:"pet4",
-        },
-        {
-            id:5,
-            title:"pet5",
-        },
-        {
-            id:6,
-            title:"pet6",
-        },
-    ];
+    const [data,setData] = useState(eg_data)
+    const totalPet = 12;
+    const eg_data = Array(totalPet).fill().map((_,i)=>({id:i+1,source:require('../image/lockedPetIcon.png')}));
+
+    useEffect(()=>{
+        const getData = async() =>{
+            try{
+                let tmp = await AsyncStorage.getItem( 'petOwn' );
+                if (tmp !== null) {
+                    tmp = JSON.parse(tmp)
+                    let tmpData = eg_data;
+                    for( let i = 0; i<tmp.length;i+=1){
+                        if (tmp[i].id === 0) continue;
+                        // console.log(tmp[i])
+                        tmpData[tmp[i].id -1].source = imageReq[tmp[i].source];
+                    }
+                    setData(tmpData)
+                }
+                else{
+                    setData(eg_data)
+                }                
+
+            } catch(e) {
+                console.log(e)
+            }
+        }
+        getData()
+    },[])
+    
+
     const Item = ({item}) =>(
         <View style={style.Item}>
-            <Text>{item.title}</Text>
+            <Image style={{flex:1}} source={item.source} resizeMode='center'/> 
         </View>
     );
     const renderItem = ({ item }) =>(
@@ -50,7 +69,6 @@ function BookPage({ navigation }){
                             />
                         </View>
                     </TouchableOpacity>
-                {/* <Ionicons name="caret-back-outline" size={32} style={style.backIcon} onPress={()=>{navigation.goBack()}}/> */}
                 <Text style={style.headerText}>illustrate</Text>
             </View>
             <View style={style.flatListOfBook}>

@@ -17,7 +17,19 @@ const globalStyle = StyleSheet.create({
         left:30,
         bottom:30,
         position:"absolute"
-    }
+    },
+    money:{
+        marginLeft:10,
+        padding:10,
+        width:"50%",
+        justifyContent:'center',        
+    },
+    moneyText:{
+        fontSize:30,
+        fontWeight:'bold',
+        textAlign:'center',
+        color:"#918070"
+    },
 });
 
 export default globalStyle;

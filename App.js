@@ -5,9 +5,10 @@ import AppContext from './utils/ReducerContext'
 
 export default function App() {
 
-  const [money,setMoney] = useState(0)
+  const [money,setMoney] = useState(1000000)
   const userSettings = {
-    money:money
+    money:money,
+    setMoney:setMoney
   }
 
   return (

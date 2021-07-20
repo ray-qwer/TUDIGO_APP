@@ -1,11 +1,13 @@
-import React from 'react';
+import React,{ useState, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Button } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import { Ionicons } from '@expo/vector-icons';
-
+import AppContext from '../utils/ReducerContext'
+import { CoinIcon} from './littleCom'
 
 function FightDragon({navigation}){
 
+    const userSettings = useContext(AppContext)
     const goDragonQuestion = () =>{
         console.log("start");
         // TODO: check if has right
@@ -18,8 +20,9 @@ function FightDragon({navigation}){
         <View style={globalStyle.containerBackground}>
             <View style={globalStyle.container}>
                 <View style={style.header}>
-                    <View style={style.money}>
-                        <Text>money</Text>
+                    <View style={globalStyle.money}>
+                        <CoinIcon/>
+                        <Text style={globalStyle.moneyText}>{userSettings.money}</Text>
                     </View>
                 </View>
                 <View style={style.body}>
@@ -44,20 +47,14 @@ function FightDragon({navigation}){
 const style = StyleSheet.create({
     header:{
         flex:1,
-        borderColor:'#000',
-        borderWidth:1,
         flexDirection:'row',
     },
     body:{
         flex:6,
-        borderColor:'#000',
-        borderWidth:1,
         alignItems:"center",
     },
     root:{
         flex:2,
-        borderColor:'#000',
-        borderWidth:1,
         alignItems:"center"
     },
     startButton:{
@@ -66,8 +63,6 @@ const style = StyleSheet.create({
     },
     dragonImage:{
         flex:3,
-        borderColor:'white',
-        borderWidth:10,
         width:"70%",
     },
     fightTitle:{
@@ -75,13 +70,6 @@ const style = StyleSheet.create({
         borderColor:'white',
         borderWidth:10,
         width:"70%",
-    },
-    money:{
-        borderColor:'#FFF',
-        borderWidth:1,
-        marginLeft:10,
-        padding:10,
-        width:"50%",
     },
 })
 

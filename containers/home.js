@@ -1,37 +1,76 @@
-import React,{ useState,useContext } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image,Dimensions } from 'react-native';
+import React,{ useState, useContext, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Image,Dimensions, TouchableHighlight,AsyncStorage,TouchableNativeFeedback } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import SettingModal from './settingModal'
+import TimeSettingModal from './timeSettingModal'
 import AppContext from '../utils/ReducerContext'
-import { hidden } from 'ansi-colors';
+import { CoinIcon } from './littleCom'
+import { timeParse } from '../utils/utils'
 
 // TODO: add animation of navigation
 // https://reactnavigation.org/docs/stack-navigator/
 
 function HomePage({navigation}){
 
-    const [showModal,setShowModal] = useState(false)
+    const [showSettingModal,setShowSettingModal] = useState(false)
+    const [showTimeSettingModal, setShowTimeSettingModal] = useState(false)
+    const [LastTime,setLastTime]  = useState(1);
+    const [dueTime,setDueTime] = useState(0)
+    const [startTimer,setStartTimer] = useState(false);
     const userSettings = useContext(AppContext)
-
+    useEffect(()=>{
+        console.log(LastTime)
+        const countDown = setInterval(function t(){
+            let time = dueTime - Date.now()
+            if ( time < 0) {
+                setLastTime(0)
+                return t
+            }
+            else {
+                setLastTime(time)
+                // console.log('why??last is 1')
+            };
+            
+            console.log('time',time)
+            console.log('last',LastTime)
+            console.log('refresh')
+            return t
+        }(),60000)
+        
+        return () => clearInterval(countDown)
+    },[startTimer,dueTime])
+    useEffect(()=>{
+        setStartTimer(true)
+        return ()=> setStartTimer(false)
+    },[])
+    const clear = async() =>{
+        await AsyncStorage.clear()
+    }
     return(
         <View style={globalStyle.containerBackground}>
         <View style={globalStyle.container}>
-            <SettingModal isVisible={showModal} onBackdropPress={() => {setShowModal(false)}} 
-                onBackButtonPress={()=>{setShowModal(false)}}
+            <SettingModal isVisible={showSettingModal} onBackdropPress={() => {setShowSettingModal(false)}} 
+                onBackButtonPress={()=>{setShowSettingModal(false)}}
+            />
+            <TimeSettingModal isVisible={showTimeSettingModal} onBackdropPress={() => {setShowTimeSettingModal(false)}} 
+                onBackButtonPress={()=>{setShowTimeSettingModal(false)}} setDueTime={setDueTime} setShowTimeSettingModal={setShowTimeSettingModal}
             />
             <View style={style.header}>
                 {/* header part */}
-                <View style={style.money}>
+                <View style={globalStyle.money}>
                     {/* show money */}
-                    <Text style={style.moneyText}>{userSettings.money}</Text>
+                    <CoinIcon/>
+                    <Text style={globalStyle.moneyText}>{userSettings.money}</Text>
                 </View>
                 <View style={style.iconDaily}>
                     {/* go to daily challenge */}
-                    <TouchableOpacity onPress={()=>navigation.navigate('Daily')}>
+                    <TouchableOpacity onPress={()=>navigation.navigate('Daily')} activeOpacity={.7}>
+                        <>
                         <Image style={{height:'90%',width:'100%'}}source={require('../image/daily.png')}
                         resizeMode='cover'
                         />
                         <Text style={style.textSub}>Daily</Text>
+                        </>
                     </TouchableOpacity>
                 </View>
             </View>
@@ -47,14 +86,19 @@ function HomePage({navigation}){
                 </View>
                 <View style={style.lastTime}>
                     {/* show last time */}
-                    <Text>last time</Text>
+                    <TouchableOpacity style={style.timeBlock} onPress={()=>{setShowTimeSettingModal(true)}} activeOpacity={.7}>
+                        <>
+                            <Text style={style.timeTitle}>剩餘時間</Text>
+                            <Text style={style.time}>{timeParse(LastTime).dd}  <Text style={{fontSize:14}}>天</Text> {timeParse(LastTime).hh} <Text style={{fontSize:14}}>時</Text> {timeParse(LastTime).mm} <Text style={{fontSize:14}}>分</Text></Text>
+                        </>
+                    </TouchableOpacity>
                 </View>
             </View>
             <View style={style.root}>
                 {/* root */}
                 <View style={style.spinEgg}>
                     {/* to spin egg */}
-                    <TouchableOpacity style={{flex:1}} onPress={()=>navigation.navigate('SpinEgg')}>
+                    <TouchableOpacity style={{flex:1}} onPress={()=>navigation.navigate('SpinEgg')} activeOpacity={.7}>
                         <View style={{flex:2}}>
                             <Image style={{height:'100%',width:'100%'}}source={require('../image/spinEgg.png')}
                             resizeMode='center'
@@ -65,15 +109,15 @@ function HomePage({navigation}){
                 </View>
                 <View style={style.illustrateBook}>
                     {/* to book */}
-                    <TouchableOpacity onPress={()=>navigation.navigate('Book')}>
+                    <TouchableOpacity onPress={()=>navigation.navigate('Book')} activeOpacity={.7}>
                         <Text>Book</Text>
                     </TouchableOpacity>
                 </View>
-                <View style={style.openBox}>
+                <View style={{...style.openBox}}>
                     {/* open box */}
-                    <TouchableOpacity style={{flex:1}} onPress={()=>{}}>
-                        <View style={{flex:1, alignItems:'center',bottom:Dimensions.get('window').height*(0.8/9)}} >
-                            <Image style={{height:'130%',width:'130%'}}source={require('../image/open.png')}
+                    <TouchableOpacity style={{ bottom:Dimensions.get('window').height*(0.8/9)}} onPress={()=>{}} activeOpacity={.7}>
+                        <View style={{alignItems:'center'}} >
+                            <Image style={{height:'100%',width:'130%',}} source={require('../image/open.png')}
                             resizeMode='center'
                             />
                         </View>
@@ -81,13 +125,13 @@ function HomePage({navigation}){
                 </View>
                 <View style={style.fightDragon}>
                     {/* fight with dragon */}
-                    <TouchableOpacity onPress={()=>navigation.navigate('FightDragon')}>
+                    <TouchableOpacity onPress={()=>navigation.navigate('FightDragon')} activeOpacity={.7}>
                         <Text>fight dragon</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={style.setting}>
                     {/* setting */}
-                    <TouchableOpacity style={{flex:1}} onPress={()=>{setShowModal(true)}}>
+                    <TouchableOpacity style={{flex:1}} onPress={()=>{setShowSettingModal(true);clear()}} activeOpacity={.7}>
                         <View style={{flex:2}}>
                             <Image style={{height:'100%',width:'100%'}}source={require('../image/setting.png')}
                             resizeMode='center'
@@ -121,17 +165,6 @@ const style = StyleSheet.create({
         borderRadius:0,
         overflow:'visible'
     },
-    money:{
-        marginLeft:10,
-        padding:10,
-        width:"50%",
-    },
-    moneyText:{
-        fontSize:30,
-        fontWeight:'bold',
-        textAlign:'center',
-        color:"#918070"
-    },
     iconDaily:{
         marginRight:10,
         padding:10,
@@ -140,7 +173,7 @@ const style = StyleSheet.create({
     showLevel:{
         borderColor:'#FFF',
         borderWidth:1,
-        flex:1,
+        flex:0.8,
         width:"70%",
     },
     showPet:{
@@ -150,10 +183,8 @@ const style = StyleSheet.create({
         width:"70%",
     },
     lastTime:{
-        borderColor:'#FFF',
-        borderWidth:1,
-        flex:1,
-        width:"70%"
+        flex:1.2,
+        width:"70%",
     },
     spinEgg:{
         flex:1,
@@ -166,6 +197,8 @@ const style = StyleSheet.create({
     openBox:{
         flex:1.8,
         padding:10,
+        height:Dimensions.get('window').height*(2.3/9),
+        bottom:0
     },
     fightDragon:{
         flex:1,
@@ -179,6 +212,26 @@ const style = StyleSheet.create({
         textAlign:'center',
         fontSize:16,
         fontStyle:'normal'
+    },
+    timeBlock:{
+        flex:1,
+        // flexDirection:'row',
+        justifyContent:'center',
+        alignItems:'center',
+        marginBottom:Dimensions.get('window').height*(0.4/9)
+    },
+    timeTitle:{
+        fontSize:20,
+        color:"#918070",
+        fontWeight:'bold'
+
+    },
+    time:{
+        justifyContent:'space-evenly',
+        textAlign:'center',
+        fontSize:28,
+        fontWeight:'bold',
+        color:"#918070"
     }
 });
 

@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, TouchableHighlight } from 're
 import globalStyle from '../styles/globalStyle'
 import { Ionicons } from '@expo/vector-icons';
 import AppContext from '../utils/ReducerContext'
+import { CoinIcon } from './littleCom';
 
 function Daily({navigation}){
 
@@ -14,8 +15,11 @@ function Daily({navigation}){
 
     const checkSuc = (ans) =>{
         setSubmit(true)
-        if(ans === idealAns)
+        if(ans === idealAns){
             setSuc(true)
+            // reward
+            userSettings.setMoney(userSettings.money+10)
+        }
         else   setSuc(false)
     }
     return(
@@ -25,8 +29,9 @@ function Daily({navigation}){
 
                 </View>
                 <View style={style.header}>
-                    <View style={style.money}>
-                        <Text style={style.moneyText}>{userSettings.money}</Text>
+                    <View style={globalStyle.money}>
+                        <CoinIcon/>
+                        <Text style={globalStyle.moneyText}>{userSettings.money}</Text>
                     </View>
                 </View>
                 <View style={style.body}>
@@ -60,31 +65,14 @@ function Daily({navigation}){
 const style = StyleSheet.create({
     header:{
         flex:1,
-        borderColor:'#000',
-        borderWidth:1,
         flexDirection:'row',
     },
     body:{
         flex:5,
-        borderColor:'#000',
-        borderWidth:1,
     },
     root:{
         flex:3,
-        borderColor:'#000',
-        borderWidth:1,
         alignItems:"center"
-    },
-    money:{
-        marginLeft:10,
-        padding:10,
-        width:"50%",
-    },
-    moneyText:{
-        fontSize:30,
-        fontWeight:'bold',
-        textAlign:'center',
-        color:"#918070"
     },
     showPet:{
         height:"70%",
