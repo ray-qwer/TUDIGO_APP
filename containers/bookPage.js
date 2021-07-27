@@ -1,8 +1,9 @@
-import React, { useEffect, useState, } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { StyleSheet, Text, View, FlatList,TouchableOpacity, Image, AsyncStorage } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import globalStyle from '../styles/globalStyle'
 import imageReq from '../utils/images'
+import AppContext from '../utils/ReducerContext'
 
 // object:{
 //     pet:{
@@ -18,33 +19,21 @@ import imageReq from '../utils/images'
 //         unlock: bool,
 //     }
 // }
+// id === 0 -> egg
 
 function BookPage({ navigation }){
     const [data,setData] = useState(eg_data)
     const totalPet = 12;
     const eg_data = Array(totalPet).fill().map((_,i)=>({id:i+1,source:require('../image/lockedPetIcon.png')}));
-
+    const userSettings = useContext(AppContext)
     useEffect(()=>{
         const getData = async() =>{
-            try{
-                let tmp = await AsyncStorage.getItem( 'petOwn' );
-                if (tmp !== null) {
-                    tmp = JSON.parse(tmp)
-                    let tmpData = eg_data;
-                    for( let i = 0; i<tmp.length;i+=1){
-                        if (tmp[i].id === 0) continue;
-                        // console.log(tmp[i])
-                        tmpData[tmp[i].id -1].source = imageReq[tmp[i].source];
-                    }
-                    setData(tmpData)
-                }
-                else{
-                    setData(eg_data)
-                }                
-
-            } catch(e) {
-                console.log(e)
+            let tmpData = eg_data
+            for (let i = 0; i<userSettings.petList.length; i+=1){
+                if(userSettings.petList[i].id === 0) continue
+                tmpData[userSettings.petList[i].id-1].source = imageReq[userSettings.petList[i].source]
             }
+            setData(tmpData)
         }
         getData()
     },[])

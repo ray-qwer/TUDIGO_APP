@@ -1,20 +1,32 @@
-import React,{ useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Dimensions,TextInput, TouchableHighlight } from 'react-native';
+import React,{ useState, useEffect, useContext } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Dimensions,TextInput, TouchableHighlight, AsyncStorage } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import Modal from 'react-native-modal';
 import { StringOfLegalInt } from '../utils/utils'
+import AppContext from '../utils/ReducerContext'
 
 function TimeSettingModal(props){
 
+    const userSettings = useContext(AppContext)
     const [day,setDay] = useState('0');
     const [hour,setHour] = useState('0');
     const [minute,setMinute] = useState('0');
-    const onConfirm = () =>{
-        let time = ((parseInt(minute,10)*60)+(parseInt(hour,10)*3600)+(parseInt(day,10)*86400))*1000;
+    const onConfirm = async() =>{
+        let period = {day:parseInt(day,10),hour:parseInt(hour,10),minute:parseInt(minute,10)}
+        await AsyncStorage.setItem('period',JSON.stringify(period))
+        userSettings.setPeriod(period)
+        let time = ((period.minute*60)+(period.hour*3600)+(period.day*86400))*1000;
         props.setDueTime(Date.now()+time);
         props.setShowTimeSettingModal(false);
     }
-
+    useEffect(()=>{
+      const getPeriod = async() =>{
+        setDay(userSettings.period.day.toString()) 
+        setHour(userSettings.period.hour.toString())
+        setMinute(userSettings.period.minute.toString())
+      }
+      getPeriod()  
+    },[])
     return(
         <Modal isVisible={props.isVisible} onBackdropPress={props.onBackdropPress} onBackButtonPress={props.onBackButtonPress}>
             <View style={{...style.settingModal,paddingTop:0,marginTop:0}}>

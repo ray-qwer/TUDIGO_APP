@@ -1,44 +1,65 @@
 
-import React, {useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, AsyncStorage } from 'react-native';
+import {useEffect, useState, useContext } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, AsyncStorage, Image } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import { Ionicons } from '@expo/vector-icons';
-
-// object:{
-//     pet:{
-//         id: number,
-//         source: string,
-//         level:  number,
-//         attribute:   number(0: water, 1: fire, 2: gress)
-//         identity:{
-//             attack:     number,
-//             defend:     number,
-//             recover:    number,
-//         },
-//         unlock: bool,
-//     }
-// }
+import AppContext from '../utils/ReducerContext'
+import imageReq from '../utils/images'
 
 function SpinResult({navigation}){
-    const [rewardId, setRewardId ] = useState(0)
+    const [rewardSrc, setRewardSrc ] = useState()
     const totalPet = 12;
+    const userSettings = useContext(AppContext)
     useEffect(()=>{
         const saveData = async() =>{
-            let RId = Math.ceil(Math.random()*totalPet)
-            console.log(RId)
-            setRewardId(RId)
-            let tmpData;
-            try{
-                tmpData = await (AsyncStorage.getItem('petOwn'))
-                if (tmpData !== null) 
-                    tmpData = JSON.parse(tmpData)
-                else tmpData = []
-            } catch(e) {
-                console.log(e)
+            // random 
+            // number(1: water, 2: fire, 3: tree, 0: first egg)
+            let attribute = Math.ceil(Math.random()*3)
+            let index = userSettings.petList.findIndex(ele => ele.id === 0 && ele.attribute === attribute)
+            if (index === -1){
+                let src;
+                if(attribute === 1) src = 'ew'
+                else if (attribute === 2) src = 'ef'
+                else src = 'et'
+                let p = {
+                    id: number,
+                    source: src,
+                    level:  0,
+                    attribute: attribute,
+                    identity:{
+                        attack:     0,
+                        defend:     0,
+                        recover:    0,
+                    },
+                    amount: 0, // only for eggs
+                }
+                userSettings.petList.push(p)
+                setRewardSrc(imageReq[src])
+                await AsyncStorage.setItem('petList',JSON.stringify(userSettings.petList))
+                return
             }
-            // TODO: change the source given by id
-            tmpData.push({id:RId,source:"unlockedPet"})
-            await AsyncStorage.setItem( 'petOwn' , JSON.stringify(tmpData))
+            else{
+                userSettings.petList[index].amount +=1
+                setRewardSrc(imageReqp[userSettings.petList[index].source])
+                await AsyncStorage.setItem('petList',JSON.stringify(userSettings.petList))
+                return
+            }
+
+            // let RId = Math.ceil(Math.random()*totalPet)
+            // console.log(RId)
+            // setReward(RId)
+            // let tmpData;
+            // try{
+            //     tmpData = await (AsyncStorage.getItem('petOwn'))
+            //     if (tmpData !== null) 
+            //         tmpData = JSON.parse(tmpData)
+            //     else tmpData = []
+            // } catch(e) {
+            //     console.log(e)
+            // }
+            // // TODO: change the source given by id
+            // tmpData.push({id:RId,source:"unlockedPet"})
+            // await AsyncStorage.setItem( 'petOwn' , JSON.stringify(tmpData))
         }
         saveData()
     },[])
@@ -51,7 +72,8 @@ function SpinResult({navigation}){
                 </View>
                 <View style={style.body}>
                     <View style={style.eggWindow}>
-                        <Text>reward: {rewardId}</Text>
+                        <Image style={{height:'100%',width:'100%'}} source={rewardSrc}
+                            resizeMode='center'/>
                     </View>
                 </View>
                 <Ionicons name="home" size={32} style={globalStyle.HomeIcon} onPress={()=>{navigation.navigate('Home')}}/>
@@ -62,15 +84,16 @@ function SpinResult({navigation}){
 
 const style = StyleSheet.create({
     header:{
-        flex:2,
-        justifyContent:"center",
+        flex:1,
+        justifyContent:'flex-end',
         // alignItems:"center",
         padding:10
     },
     body:{
         flex:5,
-        alignItems:"center",
+        alignItems:'center',
         padding:20,
+        justifyContent:'flex-start'
     },
     title:{
         textAlign:"center",
@@ -78,8 +101,8 @@ const style = StyleSheet.create({
         fontSize:32
     },
     eggWindow:{
-        width:"70%",
-        height:"70%"
+        width:"90%",
+        height:"80%",
     }
 })
 

@@ -1,27 +1,45 @@
-import React,{ useState, useContext, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image,Dimensions, TouchableHighlight,AsyncStorage,TouchableNativeFeedback } from 'react-native';
+import { useState, useContext, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, Image,Dimensions, TouchableHighlight,AsyncStorage,TouchableNativeFeedback, } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import SettingModal from './settingModal'
 import TimeSettingModal from './timeSettingModal'
+import { OpenBoxModal, AlertModal, ResultOpenModal } from './openAndDailyModal'
 import AppContext from '../utils/ReducerContext'
 import { CoinIcon } from './littleCom'
-import { timeParse } from '../utils/utils'
+import { timeParse, checkIfOverADay } from '../utils/utils'
+import ChoosePetModal from './choosePetModal';
 
 // TODO: add animation of navigation
 // https://reactnavigation.org/docs/stack-navigator/
 
 function HomePage({navigation}){
 
+    // modal variable
     const [showSettingModal,setShowSettingModal] = useState(false)
     const [showTimeSettingModal, setShowTimeSettingModal] = useState(false)
+    const [showOpenBoxModal, setShowOpenBoxModal] = useState(false)
+    const [showResultOpenModal, setShowResultOpenModal] = useState(false)
+    const [showAlertModal, setShowAlertModal] = useState(false)
+    const [alertMsg, setAlertMsg] = useState("")
+    const [showChoosePetModal, setShowChoosePetModal] = useState(false)
+    // countdown
     const [LastTime,setLastTime]  = useState(1);
     const [dueTime,setDueTime] = useState(0)
     const [startTimer,setStartTimer] = useState(false);
+    const [overDueTime, setOverDueTime] = useState(false) // check if successfully pass the challenge
+    // render home page // object from local variable
+    const [petImage, setPetImage] = useState(require('../image/spinEgg/egg_fire.png'))
+    const [exp, setExp] = useState(50)
+    const [fullExp, setFullExp] = useState(100)
+    const [level, setLevel] = useState(10)
+    const [selectedPet, setSelectedPet] = useState()
+    // 
     const userSettings = useContext(AppContext)
+    
     useEffect(()=>{
         console.log(LastTime)
         const countDown = setInterval(function t(){
-            let time = dueTime - Date.now()
+            let time = dueTime - Date.now() + 60000
             if ( time < 0) {
                 setLastTime(0)
                 return t
@@ -39,13 +57,56 @@ function HomePage({navigation}){
         
         return () => clearInterval(countDown)
     },[startTimer,dueTime])
+
     useEffect(()=>{
         setStartTimer(true)
         return ()=> setStartTimer(false)
     },[])
+    // TODO:
+    useEffect(()=>{
+        const found = userSettings.petList.find(ele => (ele.id === userSettings.selectedPet.id && ele.attribute === userSettings.selectedPet.attribute))
+        setSelectedPet(found)
+        return
+    },[userSettings.selectedPet])
+
     const clear = async() =>{
         await AsyncStorage.clear()
     }
+
+    const openBoxMessage = () => {
+        setShowOpenBoxModal(true)
+    }
+
+    const goDaily = async() =>{
+        // DailyDone: string of time when answer the Daily challenge
+        let ifDailyDone = await AsyncStorage.getItem('DailyDone')
+        if (ifDailyDone === null){
+            navigation.navigate('Daily')
+            return 
+        }
+        else if ( checkIfOverADay(ifDailyDone) ){
+            navigation.navigate('Daily')
+            return
+        }else{
+            // modal? alert?
+            setAlertMsg("今日任務已完成!!")
+            setShowAlertModal(true)
+            return
+        }        
+    }
+    
+    const onOpen = () =>{
+        // time logic
+        if (Date.now() >= dueTime){
+            setOverDueTime(true)
+        }
+        else setOverDueTime(false)
+        setShowOpenBoxModal(false)
+        setShowResultOpenModal(true)
+        let time = ((period.minute*60)+(period.hour*3600)+(period.day*86400))*1000;
+        setDueTime(Date.now()+time)
+    }
+
     return(
         <View style={globalStyle.containerBackground}>
         <View style={globalStyle.container}>
@@ -54,6 +115,20 @@ function HomePage({navigation}){
             />
             <TimeSettingModal isVisible={showTimeSettingModal} onBackdropPress={() => {setShowTimeSettingModal(false)}} 
                 onBackButtonPress={()=>{setShowTimeSettingModal(false)}} setDueTime={setDueTime} setShowTimeSettingModal={setShowTimeSettingModal}
+            />
+            <OpenBoxModal isVisible={showOpenBoxModal} onBackdropPress={() => {setShowOpenBoxModal(false)}} 
+                onBackButtonPress={()=>{setShowOpenBoxModal(false)}} onOpen={()=>{onOpen()}}
+                pet={selectedPet} 
+            />
+            <AlertModal isVisible={showAlertModal} onBackdropPress={() => {setShowAlertModal(false)}} 
+                onBackButtonPress={()=>{setShowAlertModal(false)}} content={alertMsg}
+            />
+            <ResultOpenModal isVisible={showResultOpenModal} onBackdropPress={() => {setShowResultOpenModal(false)}} 
+                onBackButtonPress={()=>{setShowResultOpenModal(false)}} isOverTime={overDueTime}
+                pet={selectedPet} onPetchange={userSettings.setPetList} petList={userSettings.petList}
+            />
+            <ChoosePetModal isVisible={showChoosePetModal} onBackdropPress={() => {setShowChoosePetModal(false)}} 
+                onBackButtonPress={()=>{setShowChoosePetModal(false)}}  
             />
             <View style={style.header}>
                 {/* header part */}
@@ -64,12 +139,12 @@ function HomePage({navigation}){
                 </View>
                 <View style={style.iconDaily}>
                     {/* go to daily challenge */}
-                    <TouchableOpacity onPress={()=>navigation.navigate('Daily')} activeOpacity={.7}>
+                    <TouchableOpacity style={{flexDirection:'column'}} onPress={()=>goDaily()} activeOpacity={.7}>
                         <>
-                        <Image style={{height:'90%',width:'100%'}}source={require('../image/daily.png')}
-                        resizeMode='cover'
+                        <Image style={{height:'100%',width:'100%'}}source={require('../image/daily.png')}
+                        resizeMode='center'
                         />
-                        <Text style={style.textSub}>Daily</Text>
+                        <Text numberOfLines={1} style={style.textSub}>每日任務</Text>
                         </>
                     </TouchableOpacity>
                 </View>
@@ -78,18 +153,24 @@ function HomePage({navigation}){
                 {/* home main page */}
                 <View style={style.showLevel}>
                     {/* show level */}
-                    <Text>show Text</Text>
+                    <Text style={style.showLevelText}>Lv.{level.toString()}</Text>
+                    <View style={style.showLevelOutlined}>
+                        <View style={[style.showLevelColor,{width:(exp/fullExp*100).toString()+'%'}]}></View>
+                    </View>
                 </View>
                 <View style={style.showPet}>
                     {/* show pet */}
-                    <Text>show Pet</Text>
+                    <TouchableOpacity style={{flex:1}} onPress={()=>{setShowChoosePetModal(true)}} activeOpacity={0.8}>
+                        <Image style={{height:'100%',width:'100%'}} source={petImage}
+                            resizeMode='center'/>
+                    </TouchableOpacity>
                 </View>
                 <View style={style.lastTime}>
                     {/* show last time */}
                     <TouchableOpacity style={style.timeBlock} onPress={()=>{setShowTimeSettingModal(true)}} activeOpacity={.7}>
                         <>
                             <Text style={style.timeTitle}>剩餘時間</Text>
-                            <Text style={style.time}>{timeParse(LastTime).dd}  <Text style={{fontSize:14}}>天</Text> {timeParse(LastTime).hh} <Text style={{fontSize:14}}>時</Text> {timeParse(LastTime).mm} <Text style={{fontSize:14}}>分</Text></Text>
+                            <Text style={style.time}>{timeParse(LastTime).dd} <Text style={{fontSize:14}}>天</Text> {timeParse(LastTime).hh} <Text style={{fontSize:14}}>時</Text> {timeParse(LastTime).mm} <Text style={{fontSize:14}}>分</Text></Text>
                         </>
                     </TouchableOpacity>
                 </View>
@@ -98,8 +179,8 @@ function HomePage({navigation}){
                 {/* root */}
                 <View style={style.spinEgg}>
                     {/* to spin egg */}
-                    <TouchableOpacity style={{flex:1}} onPress={()=>navigation.navigate('SpinEgg')} activeOpacity={.7}>
-                        <View style={{flex:2}}>
+                    <TouchableOpacity style={{flex:1,}} onPress={()=>navigation.navigate('SpinEgg')} activeOpacity={.7}>
+                        <View style={{flex:2,paddingHorizontal:2.5}}>
                             <Image style={{height:'100%',width:'100%'}}source={require('../image/spinEgg.png')}
                             resizeMode='center'
                             />
@@ -109,15 +190,20 @@ function HomePage({navigation}){
                 </View>
                 <View style={style.illustrateBook}>
                     {/* to book */}
-                    <TouchableOpacity onPress={()=>navigation.navigate('Book')} activeOpacity={.7}>
-                        <Text>Book</Text>
+                    <TouchableOpacity style={{flex:1}} onPress={()=>navigation.navigate('Book')} activeOpacity={.7}>
+                        <View style={{flex:2,paddingHorizontal:2.5}}>
+                            <Image style={{height:'100%',width:'100%'}}source={require('../image/illustrate.png')}
+                            resizeMode='center'
+                            />
+                        </View>
+                        <Text style={{...style.textSub,flex:1}}>圖鑑</Text>
                     </TouchableOpacity>
                 </View>
                 <View style={{...style.openBox}}>
                     {/* open box */}
-                    <TouchableOpacity style={{ bottom:Dimensions.get('window').height*(0.8/9)}} onPress={()=>{}} activeOpacity={.7}>
+                    <TouchableOpacity style={{ bottom:Dimensions.get('window').height*(0.8/9)}} onPress={()=>{openBoxMessage()}} activeOpacity={.7}>
                         <View style={{alignItems:'center'}} >
-                            <Image style={{height:'100%',width:'130%',}} source={require('../image/open.png')}
+                            <Image style={{height:'100%',width:'100%',}} source={require('../image/open.png')}
                             resizeMode='center'
                             />
                         </View>
@@ -125,14 +211,21 @@ function HomePage({navigation}){
                 </View>
                 <View style={style.fightDragon}>
                     {/* fight with dragon */}
-                    <TouchableOpacity onPress={()=>navigation.navigate('FightDragon')} activeOpacity={.7}>
-                        <Text>fight dragon</Text>
+                    <TouchableOpacity style={{flex:1}} onPress={()=>navigation.navigate('FightDragon')} activeOpacity={.7}>
+                        <View style={{flex:2,paddingHorizontal:2.5}}>
+                            <Image style={{height:'100%',width:'100%'}} source={require('../image/fightDragon.png')}
+                            resizeMode='center'
+                            />
+                        </View>
+                        <View style={{flex:1}}>
+                            <Text style={{...style.textSub}}>勇闖巨龍</Text>
+                        </View>
                     </TouchableOpacity>
                 </View>
                 <View style={style.setting}>
                     {/* setting */}
-                    <TouchableOpacity style={{flex:1}} onPress={()=>{setShowSettingModal(true);clear()}} activeOpacity={.7}>
-                        <View style={{flex:2}}>
+                    <TouchableOpacity style={{flex:1}} onPress={()=>{setShowSettingModal(true)}} activeOpacity={.7}>
+                        <View style={{flex:2,paddingHorizontal:2.5}}>
                             <Image style={{height:'100%',width:'100%'}}source={require('../image/setting.png')}
                             resizeMode='center'
                             />
@@ -168,19 +261,38 @@ const style = StyleSheet.create({
     iconDaily:{
         marginRight:10,
         padding:10,
-        width:"20%"
+        width:"30%",
+        flexDirection:'row',
+        justifyContent:'flex-end',
     },
     showLevel:{
-        borderColor:'#FFF',
-        borderWidth:1,
         flex:0.8,
         width:"70%",
+        alignItems:'center',
+
+    },
+    showLevelOutlined:{
+        width:"60%",
+        height:20,
+        borderWidth:5,
+        borderColor:'#716050',
+        backgroundColor:'transparent',
+        borderRadius:5,
+        marginTop:5
+    },
+    showLevelColor:{
+        height:'100%',
+        backgroundColor:'#D1C0B0',
+    },
+    showLevelText:{
+        fontSize:32,
+        color:'#716050'
     },
     showPet:{
         borderColor:'#FFF',
-        borderWidth:1,
         flex:2,
-        width:"70%",
+        width:"80%",
+        justifyContent:'center',
     },
     lastTime:{
         flex:1.2,
@@ -188,29 +300,29 @@ const style = StyleSheet.create({
     },
     spinEgg:{
         flex:1,
-        padding:10,
+        paddingHorizontal:3
     },
     illustrateBook:{
         flex:1,
-        padding:10,
+        paddingHorizontal:3
     },
     openBox:{
         flex:1.8,
-        padding:10,
+        padding:3,
         height:Dimensions.get('window').height*(2.3/9),
         bottom:0
     },
     fightDragon:{
         flex:1,
-        padding:10,
+        paddingHorizontal:3
     },
     setting:{
         flex:1,
-        padding:10,
+        paddingHorizontal:3
     },
     textSub:{
         textAlign:'center',
-        fontSize:16,
+        fontSize:15,
         fontStyle:'normal'
     },
     timeBlock:{

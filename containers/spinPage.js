@@ -9,7 +9,7 @@ import { CoinIcon } from './littleCom';
 function SpinPage({navigation}){
     
     const userSettings = useContext(AppContext);
-    const [price, setPrice] = useState(50);
+    const [price, setPrice] = useState(1000);
     const [modalVisible, setModalVisible] = useState(false)
 
     const goSpinResult = () =>{
@@ -56,7 +56,8 @@ function SpinPage({navigation}){
                         </TouchableWithoutFeedback>
                     </View>
                     <View style={style.price}>
-                        <Text style={style.Text}>${price}</Text>
+                        <CoinIcon position="relative"/>
+                        <Text style={style.Text}>{price}</Text>
                     </View>
                 </View>
                 <View style={style.root}>
@@ -83,6 +84,8 @@ const style = StyleSheet.create({
         flex:2,
         width:"70%",
         justifyContent:'center',
+        alignItems:'center',
+        flexDirection:'row'
     },
     eggWindow:{
         flex:5,
@@ -128,6 +131,7 @@ const style = StyleSheet.create({
         fontSize:50,
         textAlign:'center',
         color:"#a27762",
+        margin:10
     }
 })
 

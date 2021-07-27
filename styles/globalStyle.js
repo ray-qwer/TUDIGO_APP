@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native'
+import {StyleSheet,Dimensions } from 'react-native'
 
 const globalStyle = StyleSheet.create({
     container:{
@@ -21,8 +21,9 @@ const globalStyle = StyleSheet.create({
     money:{
         marginLeft:10,
         padding:10,
-        width:"50%",
-        justifyContent:'center',        
+        width:"45%",
+        justifyContent:'center',
+        alignItems:'flex-end'        
     },
     moneyText:{
         fontSize:30,
@@ -30,6 +31,18 @@ const globalStyle = StyleSheet.create({
         textAlign:'center',
         color:"#918070"
     },
+    Modal:{
+        width:Dimensions.get('screen').width*0.9,
+        height:Dimensions.get('screen').height*0.6,
+        backgroundColor:'white',
+        justifyContent:'center',
+        backgroundColor: '#D1C0B0',
+        borderColor:'#D1C0B0',
+        borderWidth:5,
+        borderStyle: 'solid',
+        borderRadius:16,
+        padding:10,
+    }
 });
 
 export default globalStyle;

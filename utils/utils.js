@@ -14,4 +14,21 @@ function StringOfLegalInt (text) {
     if(isNaN(parsed)) return '0';
     else return parsed.toString();  
 }
-export { timeParse, StringOfLegalInt };
+const delay =(interval) =>{
+    return new Promise((resolve)=>{
+        setTimeout(resolve,interval)
+    })
+} 
+function checkIfOverADay (prevTime) {
+    // typeof(prevTime): string
+    prevTime = parseInt(prevTime,10)
+    let now = new Date(Date.now())
+    prevTime = new Date(prevTime)
+    // return true if over a day, else return false
+    if ( (now - prevTime) > 86400000 || prevTime.getDay() !== now.getDay() ){
+        return true
+    }
+    else return false
+}
+
+export { timeParse, StringOfLegalInt, delay, checkIfOverADay };

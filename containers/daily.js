@@ -1,5 +1,5 @@
-import React,{useState,useEffect,useContext } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TouchableHighlight } from 'react-native';
+import {useState,useEffect,useContext } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, TouchableHighlight, AsyncStorage,Image } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import { Ionicons } from '@expo/vector-icons';
 import AppContext from '../utils/ReducerContext'
@@ -12,13 +12,15 @@ function Daily({navigation}){
     const [submit,setSubmit] = useState(false)
     const [suc,setSuc] = useState(false)
     const userSettings = useContext(AppContext)
-
-    const checkSuc = (ans) =>{
+    const [petImage,setPetImage] = useState(require('../image/pets/tree/T4.png'))
+    const checkSuc = async(ans) =>{
         setSubmit(true)
         if(ans === idealAns){
             setSuc(true)
             // reward
             userSettings.setMoney(userSettings.money+10)
+            // set done time
+            await AsyncStorage.setItem('DailyDone',Date.now().toString())
         }
         else   setSuc(false)
     }
@@ -36,6 +38,8 @@ function Daily({navigation}){
                 </View>
                 <View style={style.body}>
                     <View style={style.showPet}>
+                        <Image style={{height:'100%',width:'100%'}}source={petImage}
+                            resizeMode='center'/>
                     </View>
                 </View>
                 <View style={style.root}>
@@ -80,8 +84,6 @@ const style = StyleSheet.create({
         left:"15%",
         bottom:"0%",
         position:"absolute",
-        borderColor:'white',
-        borderWidth:10,
     },
     dailyChallenge:{
         position:'absolute',
