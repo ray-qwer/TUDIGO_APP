@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image,Dimensions, TouchableHighlight,AsyncStorage,TouchableNativeFeedback, } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import SettingModal from './settingModal'
@@ -8,7 +8,7 @@ import AppContext from '../utils/ReducerContext'
 import { CoinIcon } from './littleCom'
 import { timeParse, checkIfOverADay } from '../utils/utils'
 import ChoosePetModal from './choosePetModal';
-
+import imageReq from '../utils/images'
 // TODO: add animation of navigation
 // https://reactnavigation.org/docs/stack-navigator/
 
@@ -24,18 +24,21 @@ function HomePage({navigation}){
     const [showChoosePetModal, setShowChoosePetModal] = useState(false)
     // countdown
     const [LastTime,setLastTime]  = useState(1);
-    const [dueTime,setDueTime] = useState(0)
+    // const [dueTime,setDueTime] = useState(0)
     const [startTimer,setStartTimer] = useState(false);
     const [overDueTime, setOverDueTime] = useState(false) // check if successfully pass the challenge
     // render home page // object from local variable
-    const [petImage, setPetImage] = useState(require('../image/spinEgg/egg_fire.png'))
     const [exp, setExp] = useState(50)
     const [fullExp, setFullExp] = useState(100)
-    const [level, setLevel] = useState(10)
-    const [selectedPet, setSelectedPet] = useState()
+    const [selectedPet, setSelectedPet] = useState(null)
     // 
     const userSettings = useContext(AppContext)
-    
+    const {dueTime, setDueTime} = userSettings
+
+    const setAsyncStorageDueTime = async(time) =>{
+        await AsyncStorage.setItem('dueTime',JSON.stringify(time))
+        setDueTime(time)
+    }
     useEffect(()=>{
         console.log(LastTime)
         const countDown = setInterval(function t(){
@@ -64,10 +67,12 @@ function HomePage({navigation}){
     },[])
     // TODO:
     useEffect(()=>{
+        console.log(userSettings.selectedPet)
         const found = userSettings.petList.find(ele => (ele.id === userSettings.selectedPet.id && ele.attribute === userSettings.selectedPet.attribute))
+        console.log(found)
         setSelectedPet(found)
         return
-    },[userSettings.selectedPet])
+    },[userSettings.selectedPet,selectedPet])
 
     const clear = async() =>{
         await AsyncStorage.clear()
@@ -81,11 +86,11 @@ function HomePage({navigation}){
         // DailyDone: string of time when answer the Daily challenge
         let ifDailyDone = await AsyncStorage.getItem('DailyDone')
         if (ifDailyDone === null){
-            navigation.navigate('Daily')
+            navigation.navigate('Daily', { pet: selectedPet })
             return 
         }
         else if ( checkIfOverADay(ifDailyDone) ){
-            navigation.navigate('Daily')
+            navigation.navigate('Daily', { pet: selectedPet })
             return
         }else{
             // modal? alert?
@@ -95,7 +100,7 @@ function HomePage({navigation}){
         }        
     }
     
-    const onOpen = () =>{
+    const onOpen = async() =>{
         // time logic
         if (Date.now() >= dueTime){
             setOverDueTime(true)
@@ -103,8 +108,9 @@ function HomePage({navigation}){
         else setOverDueTime(false)
         setShowOpenBoxModal(false)
         setShowResultOpenModal(true)
-        let time = ((period.minute*60)+(period.hour*3600)+(period.day*86400))*1000;
+        let time = ((userSettings.period.minute*60)+(userSettings.period.hour*3600)+(userSettings.period.day*86400))*1000;
         setDueTime(Date.now()+time)
+        await AsyncStorage.setItem('dueTime',JSON.stringify(Date.now()+time))
     }
 
     return(
@@ -114,7 +120,7 @@ function HomePage({navigation}){
                 onBackButtonPress={()=>{setShowSettingModal(false)}}
             />
             <TimeSettingModal isVisible={showTimeSettingModal} onBackdropPress={() => {setShowTimeSettingModal(false)}} 
-                onBackButtonPress={()=>{setShowTimeSettingModal(false)}} setDueTime={setDueTime} setShowTimeSettingModal={setShowTimeSettingModal}
+                onBackButtonPress={()=>{setShowTimeSettingModal(false)}} setDueTime={setAsyncStorageDueTime} setShowTimeSettingModal={setShowTimeSettingModal}
             />
             <OpenBoxModal isVisible={showOpenBoxModal} onBackdropPress={() => {setShowOpenBoxModal(false)}} 
                 onBackButtonPress={()=>{setShowOpenBoxModal(false)}} onOpen={()=>{onOpen()}}
@@ -125,10 +131,10 @@ function HomePage({navigation}){
             />
             <ResultOpenModal isVisible={showResultOpenModal} onBackdropPress={() => {setShowResultOpenModal(false)}} 
                 onBackButtonPress={()=>{setShowResultOpenModal(false)}} isOverTime={overDueTime}
-                pet={selectedPet} onPetchange={userSettings.setPetList} petList={userSettings.petList}
+                pet={selectedPet} onPetListChange={userSettings.setPetList} petList={userSettings.petList} onPetChange={userSettings.setSelectedPet}
             />
             <ChoosePetModal isVisible={showChoosePetModal} onBackdropPress={() => {setShowChoosePetModal(false)}} 
-                onBackButtonPress={()=>{setShowChoosePetModal(false)}}  
+                onBackButtonPress={()=>{setShowChoosePetModal(false)}}  setDueTime={setAsyncStorageDueTime}
             />
             <View style={style.header}>
                 {/* header part */}
@@ -153,15 +159,15 @@ function HomePage({navigation}){
                 {/* home main page */}
                 <View style={style.showLevel}>
                     {/* show level */}
-                    <Text style={style.showLevelText}>Lv.{level.toString()}</Text>
+                    <Text style={style.showLevelText}>Lv.{(selectedPet!==null)?(selectedPet.level.toString()):('0')}</Text>
                     <View style={style.showLevelOutlined}>
-                        <View style={[style.showLevelColor,{width:(exp/fullExp*100).toString()+'%'}]}></View>
+                        <View style={[style.showLevelColor,selectedPet!==null && {width:(exp/fullExp*100).toString()+'%'}]}></View>
                     </View>
                 </View>
                 <View style={style.showPet}>
                     {/* show pet */}
                     <TouchableOpacity style={{flex:1}} onPress={()=>{setShowChoosePetModal(true)}} activeOpacity={0.8}>
-                        <Image style={{height:'100%',width:'100%'}} source={petImage}
+                        <Image style={{height:'100%',width:'100%'}} source={(selectedPet!==null)?(imageReq[selectedPet.source]):(imageReq['eq'])}
                             resizeMode='center'/>
                     </TouchableOpacity>
                 </View>
@@ -224,7 +230,7 @@ function HomePage({navigation}){
                 </View>
                 <View style={style.setting}>
                     {/* setting */}
-                    <TouchableOpacity style={{flex:1}} onPress={()=>{setShowSettingModal(true)}} activeOpacity={.7}>
+                    <TouchableOpacity style={{flex:1}} onPress={()=>{clear();setShowSettingModal(true)}} activeOpacity={.7}>
                         <View style={{flex:2,paddingHorizontal:2.5}}>
                             <Image style={{height:'100%',width:'100%'}}source={require('../image/setting.png')}
                             resizeMode='center'

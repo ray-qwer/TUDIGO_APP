@@ -1,24 +1,16 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Dimensions, Image, AsyncStorage } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import Modal from 'react-native-modal';
 import { TriangleLeft, TriangleRight } from './littleCom'
 import AppContext from '../utils/ReducerContext'
+import imageReq from '../utils/images'
 
 function ChoosePetModal(props){
     // isPet -> is choosing pets, !isPet -> is choosing eggs
     const [isPet, setIsPet] = useState(true)
-    const [pets,setPets] = useState([
-        require('../image/pets/tree/T1.png'),
-        require('../image/pets/tree/T2.png'),
-        require('../image/pets/tree/T3.png'),
-        require('../image/pets/tree/T4.png'),
-    ])
-    const [eggs, setEggs] = useState([
-        require('../image/spinEgg/egg_fire.png'),
-        require('../image/spinEgg/egg_tree.png'),
-        require('../image/spinEgg/egg_water.png'),        
-    ])
+    const [pets,setPets] = useState([])
+    const [eggs, setEggs] = useState([])
     const [src, setSrc] = useState()
     const [petsId, setPetsId] = useState(0)
     const [eggsId, setEggsId] = useState(0)
@@ -27,40 +19,44 @@ function ChoosePetModal(props){
 
     useEffect(()=>{
         // TODO:
+        if(!props.isVisible) return
         let petList = userSettings.petList.filter(ele => ele.id !== 0)
         let eggList = userSettings.petList.filter(ele => ele.id === 0)
         setPets(petList)
         setEggs(eggList)
-    },[userSettings.petList])
-    
-    useEffect(()=>{
-        // TODO:
         let s = userSettings.selectedPet
         if (s.id === 0){
             // egg
             setIsPet(false)
             // setSrc
             // get index
-            let index = eggs.findIndex(ele => ele.attribute === s.attribute)
+            let index = eggList.findIndex(ele => ele.attribute === s.attribute)
             setEggsId(index)
             setPetsId(0)
         } else {
             setIsPet(true)
             // setSrc
             // get index
-            let index = pets.findIndex(ele => ele.id === s.id)
-            setEggsId(index)
-            setPetsId(0)
+            let index = petList.findIndex(ele => ele.id === s.id)
+            console.log(index)
+            setPetsId(index)
+            setEggsId(0)
+            // setSrc(imageReq[petList[index].source])
         }
-    },[userSettings.selectedPet])
+    },[props.isVisible])
+
+    
 
     useEffect(()=>{
+        if(!props.isVisible) return
         if(isPet){
-            setSrc(pets[petsId])
+            if(pets.length === 0) { setSrc(''); return }
+            setSrc(imageReq[pets[petsId].source])
         }else{
-            setSrc(eggs[eggsId])
+            if(eggs.length === 0) { setSrc(''); return }
+            setSrc(imageReq[eggs[eggsId].source])
         }
-    },[isPet,petsId,eggsId])
+    },[isPet,petsId,eggsId,pets,eggs])
 
     const idIncreasing = () =>{
         if (isPet){
@@ -79,11 +75,11 @@ function ChoosePetModal(props){
     const idDecreasing = () =>{
         if (isPet){
             if(petsId === 0 ){
-                setPetsId(petsId.length-1)
+                setPetsId(pets.length-1)
             }
             else setPetsId(petsId-1)
         } else {
-            if (eggsId+1 === 0){
+            if (eggsId === 0){
                 setEggsId(eggs.length-1)
             }
             else setEggsId(eggsId-1)
@@ -102,6 +98,9 @@ function ChoosePetModal(props){
         }
         userSettings.setSelectedPet(p)
         await AsyncStorage.setItem('selectedPet',JSON.stringify(p))
+        // time reset
+        let time = ((userSettings.period.minute*60)+(userSettings.period.hour*3600)+(userSettings.period.day*86400))*1000;
+        props.setDueTime(time+Date.now())        
     }
 
     return(
@@ -138,7 +137,7 @@ function ChoosePetModal(props){
                             </TouchableOpacity>
                         </View>
                         <View style={style.btnBlock}>
-                            <TouchableOpacity activeOpacity={0.6} style={style.btn} onPress={()=>{onSelect()}}>
+                            <TouchableOpacity activeOpacity={0.6} style={style.btn} onPress={()=>{onSelect();props.onBackButtonPress()}}>
                                 <Text style={style.btnText}>選擇</Text>
                             </TouchableOpacity>
                         </View>

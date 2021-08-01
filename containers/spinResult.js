@@ -1,5 +1,5 @@
 
-import {useEffect, useState, useContext } from 'react';
+import React, {useEffect, useState, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, AsyncStorage, Image } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import { Ionicons } from '@expo/vector-icons';
@@ -8,13 +8,13 @@ import imageReq from '../utils/images'
 
 function SpinResult({navigation}){
     const [rewardSrc, setRewardSrc ] = useState()
-    const totalPet = 12;
     const userSettings = useContext(AppContext)
+    const { attribute } = userSettings
     useEffect(()=>{
         const saveData = async() =>{
             // random 
             // number(1: water, 2: fire, 3: tree, 0: first egg)
-            let attribute = Math.ceil(Math.random()*3)
+            // let attribute = Math.ceil(Math.random()*3)
             let index = userSettings.petList.findIndex(ele => ele.id === 0 && ele.attribute === attribute)
             if (index === -1){
                 let src;
@@ -22,7 +22,7 @@ function SpinResult({navigation}){
                 else if (attribute === 2) src = 'ef'
                 else src = 'et'
                 let p = {
-                    id: number,
+                    id: 0,
                     source: src,
                     level:  0,
                     attribute: attribute,
@@ -31,7 +31,7 @@ function SpinResult({navigation}){
                         defend:     0,
                         recover:    0,
                     },
-                    amount: 0, // only for eggs
+                    amount: 1, // only for eggs
                 }
                 userSettings.petList.push(p)
                 setRewardSrc(imageReq[src])
@@ -40,26 +40,10 @@ function SpinResult({navigation}){
             }
             else{
                 userSettings.petList[index].amount +=1
-                setRewardSrc(imageReqp[userSettings.petList[index].source])
+                setRewardSrc(imageReq[userSettings.petList[index].source])
                 await AsyncStorage.setItem('petList',JSON.stringify(userSettings.petList))
                 return
             }
-
-            // let RId = Math.ceil(Math.random()*totalPet)
-            // console.log(RId)
-            // setReward(RId)
-            // let tmpData;
-            // try{
-            //     tmpData = await (AsyncStorage.getItem('petOwn'))
-            //     if (tmpData !== null) 
-            //         tmpData = JSON.parse(tmpData)
-            //     else tmpData = []
-            // } catch(e) {
-            //     console.log(e)
-            // }
-            // // TODO: change the source given by id
-            // tmpData.push({id:RId,source:"unlockedPet"})
-            // await AsyncStorage.setItem( 'petOwn' , JSON.stringify(tmpData))
         }
         saveData()
     },[])

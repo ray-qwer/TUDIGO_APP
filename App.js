@@ -16,7 +16,6 @@
 //             defend:     number,
 //             recover:    number,
 //         },
-//         unlock: bool,
 //         amount: number, // only for eggs
 //     }
 // ]    
@@ -26,18 +25,19 @@
 //    id: number
 //    attribute: number
 // }
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View,Dimensions, AsyncStorage } from 'react-native';
 import HomeStackNav from './routes/stackRoute'
 import AppContext from './utils/ReducerContext'
 
 export default function App() {
 
-  const [money,setMoney] = useState(1000000)
-  const [period, setPeriod] = useState()
+  const [money,setMoney] = useState(1000)
+  const [period, setPeriod] = useState(null)
   const [loading, setLoading] = useState(true)
   const [petList, setPetList] = useState([])
-  const [selectedPet, setSelectedPet] = useState()
+  const [selectedPet, setSelectedPet] = useState(null)
+  const [dueTime, setDueTime] = useState(0)
   const userSettings = {
     money:money,
     setMoney:setMoney,
@@ -47,6 +47,8 @@ export default function App() {
     setPetList:setPetList,
     selectedPet: selectedPet,
     setSelectedPet: setSelectedPet,
+    dueTime: dueTime,
+    setDueTime: setDueTime,
   }
 
   useEffect(()=>{
@@ -54,10 +56,21 @@ export default function App() {
       await fetchPeriod()
       await fetchPetList()
       await fetchSelectedPet()
+      await fetchDueTime()
       setLoading(false)
     }
     fetchData()
   },[])
+
+  const fetchDueTime = async() =>{
+    let d = await AsyncStorage.getItem('dueTime')
+    if(d !== null) {
+      d = JSON.parse(d)
+      setDueTime(d)
+    } else {
+      setDueTime(0)
+    }
+  }
 
   const fetchPeriod = async() =>{
     let p = await AsyncStorage.getItem('period')
@@ -67,7 +80,7 @@ export default function App() {
       } else {
         setPeriod({
           day:0,
-          hour:0,
+          hour:4,
           minute:0,
         })
       }
@@ -81,7 +94,7 @@ export default function App() {
       // TODO:
       let p = [{
             id: 0,
-            source:"",
+            source:"eq",
             level:0,
             attribute:0,
             identity:{
@@ -89,7 +102,7 @@ export default function App() {
                 defend: 0,
                 recover: 0,
             },
-            amount: 0,
+            amount: 1,
       }]
       await AsyncStorage.setItem('petList',JSON.stringify(p))
       setPetList(p)

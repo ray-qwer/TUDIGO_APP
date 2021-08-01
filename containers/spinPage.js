@@ -11,7 +11,8 @@ function SpinPage({navigation}){
     const userSettings = useContext(AppContext);
     const [price, setPrice] = useState(1000);
     const [modalVisible, setModalVisible] = useState(false)
-
+    const [ifSelect, setIfSelect] = useState(false)
+    let attri = 0;
     const goSpinResult = () =>{
         if(userSettings.money < price){
             setModalVisible(true);
@@ -20,7 +21,13 @@ function SpinPage({navigation}){
         else{
             userSettings.setMoney(userSettings.money - price)
         }
-        navigation.navigate("SpinResult")
+        navigation.navigate("SpinResult",{attribute:attri})
+        setIfSelect(false)
+    }
+    const onSelectAttri= (a) =>{
+        attri = a
+        setIfSelect(true)
+        console.log(attri)
     }
 
     return(
@@ -46,19 +53,39 @@ function SpinPage({navigation}){
                     {/* <Text style={style.headerTitle}>SPIN EGG!</Text> */}
                 </View>
                 <View style={style.body}>
-                    <View style={style.eggWindow}>
-                        <TouchableWithoutFeedback onPress={()=>{goSpinResult()}}>
-                            <Image 
-                                source={require('../image/egg_example.png')}
-                                style={style.egg}
-                                resizeMode='cover'
-                                />
-                        </TouchableWithoutFeedback>
-                    </View>
-                    <View style={style.price}>
-                        <CoinIcon position="relative"/>
-                        <Text style={style.Text}>{price}</Text>
-                    </View>
+                    {ifSelect?(
+                        <>
+                        <View style={style.eggWindow}>
+                            <TouchableWithoutFeedback onPress={()=>{goSpinResult()}}>
+                                <Image 
+                                    source={require('../image/spinEgg/eq.png')}
+                                    style={style.egg}
+                                    resizeMode='center'
+                                    />
+                            </TouchableWithoutFeedback>
+                        </View>
+                        <View style={style.price}>
+                            <CoinIcon position="relative"/>
+                            <Text style={style.Text}>{price}</Text>
+                        </View>
+                        </>
+                    ):(
+                        <View style={style.AttriWindow}>
+                            <View style={{flexDirection:'row',}}>
+                                <TouchableOpacity style={style.selectAttri} onPress={()=>{onSelectAttri(2)}}>
+                                    <Text>Fire</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={style.selectAttri} onPress={()=>{onSelectAttri(1)}}>
+                                    <Text>Water</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View>
+                                <TouchableOpacity style={style.selectAttri} onPress={()=>{onSelectAttri(3)}}>
+                                    <Text>Tree</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
                 </View>
                 <View style={style.root}>
                     <Ionicons name="home" size={32} style={globalStyle.HomeIcon} onPress={()=>{navigation.navigate('Home')}}/>
@@ -76,6 +103,7 @@ const style = StyleSheet.create({
     body:{
         flex:7,
         alignItems:'center',
+        justifyContent:'center'
     },
     root:{
         flex:1,
@@ -91,6 +119,16 @@ const style = StyleSheet.create({
         flex:5,
         width:"70%",
         justifyContent:"flex-end",
+    },
+    AttriWindow:{
+        justifyContent:'center',
+        alignItems:'center'
+    },
+    selectAttri:{
+        borderWidth:1,
+        height:110,
+        width:110,
+        margin:10
     },
     egg:{
         height:"90%",

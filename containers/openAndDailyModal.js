@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Dimensions, AsyncStorage,Image } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import Modal from 'react-native-modal';
@@ -10,8 +10,12 @@ function OpenBoxModal(props){
     const [petImage, setPetImage] = useState('')
     
     useEffect(()=>{
-        setPetImage(imageReq[props.pet.source])
-    },[props])
+        // console.log(props.isVisible)
+        if(props.isVisible){
+            console.log(props.pet)
+            setPetImage(imageReq[props.pet.source])
+        }
+    },[props.isVisible])
     return(
         <Modal isVisible={props.isVisible} onBackdropPress={props.onBackdropPress} onBackButtonPress={props.onBackButtonPress}>
             <View style={globalStyle.Modal}>
@@ -38,7 +42,7 @@ function OpenBoxModal(props){
                                     <Text style={style.textBtn}>好</Text>
                                 </View>
                             </TouchableOpacity>
-                            <TouchableOpacity activeOpacity={0.8}>
+                            <TouchableOpacity activeOpacity={0.8} onPress={props.onBackButtonPress}>
                                 <View style={style.btn}>
                                     <Text style={style.textBtn}>再想想</Text>
                                 </View>
@@ -51,19 +55,88 @@ function OpenBoxModal(props){
     );
 }
 function ResultOpenModal(props){
-    const [petImage, setPetImage] = useState()
+    const [petImage, setPetImage] = useState(null)
     useEffect(()=>{
+        if(props.isVisible) setPetImage(imageReq[props.pet.source])
+    },[props.isVisible])
+    useEffect(()=>{
+        if (!props.isVisible) return
+        const setAsyncStoragePetList = async() =>{
+            console.log(props.petList)
+            await AsyncStorage.setItem('petList',JSON.stringify(props.petList))
+        }
+        const setAsyncStorageSelectedPet = async(selectedPet) =>{
+            await AsyncStorage.setItem('selectedPet',JSON.stringify(selectedPet))
+        } 
+
         if(props.isOverTime){
-            if (props.pet.id === 0){
-                let randomNum = Math.ceil(Math.random()*4)
-                let attributeLetter =   (props.pet.attribute===1)?'w':
-                                        (props.pet.attribute===2)?'f':
-                                        't';
-                let src = random+attributeLetter
-                // id calculate
+            let p = props.pet
+            if (p.id === 0){
+                let id,src,attribute;
+                if(p.attribute !== 0){
+                    let randomNum = Math.ceil(Math.random()*4)
+                    let attributeLetter =   (p.attribute===1)?'w':
+                                            (p.attribute===2)?'f':
+                                            't';
+                    src = attributeLetter + randomNum.toString()
+                    // id calculated equation: (attribute-1)*4+(randomNum-1)
+                    setPetImage(imageReq[src])
+                    id = (p.attribute-1)*4 + randomNum
+                    attribute = p.attribute
+                }
+                else {
+                    // random
+                    let randomNum = Math.ceil(Math.random()*12)
+                    attribute = Math.ceil(randomNum/4)
+                    let attributeLetter =   (attribute===1)?'w':
+                                            (attribute===2)?'f':
+                                            't';
+                    src = attributeLetter + (randomNum%4+1).toString()
+                    setPetImage(imageReq[src])
+                    id = randomNum
+                    
+                }
+                if(p.amount === 1){
+                    p.id = id
+                    p.source = src
+                    p.level += 1
+                    p.attribute = attribute
+                    setAsyncStorageSelectedPet({id:p.id,attribute:p.attribute})
+                    props.onPetChange({id:id,attribute:attribute})
+                } else {
+                    let tmpP = {
+                        id: id,
+                        source: src,
+                        level:1,
+                        attribute: p.attribute,
+                        identity:{
+                            attack: 10,
+                            defend: 10,
+                            recover: 10,
+                        },
+                        amount: 1,
+                    }
+                    p.amount -= 1
+                    let newPetList;
+                    if (p.amount === 0){
+                        // pop up 
+                        newPetList = props.petList.filter(ele => ele === p)
+                    }
+                    else newPetList = props.petList
+                    props.onPetListChange([...newPetList,tmpP])
+                    props.onPetChange({id:tmpP.id,attribute:tmpP.attribute})
+                    setAsyncStorageSelectedPet({id:tmpP.id,attribute:tmpP.attribute})
+                }
+            } else {
+                // level up
+                p.level +=1
+                setPetImage(imageReq[p.source])
             }
         }
-    },[props.pet,props.isOverTime])
+        setAsyncStoragePetList()
+
+
+    },[props.isVisible])
     return(
         <Modal isVisible={props.isVisible} onBackdropPress={props.onBackdropPress} onBackButtonPress={props.onBackButtonPress}>
             <View style={globalStyle.Modal}>
@@ -80,8 +153,11 @@ function ResultOpenModal(props){
                             <Text style={style.textTitle}>{props.isOverTime?'飼養成功':'飼養失敗'}</Text>
                         </View>
                         <View style={style.petShow}>
-                            <Image
+                            <Image style={{height:'100%',width:'100%'}}source={petImage}
+                            resizeMode='center'
                             />
+                            <Image style={{position:'absolute',bottom:0,width:'100%',height:'35%',borderWidth:1}} source={(props.isOverTime)?(require("../image/sucLight.png")):(require("../image/loseLight.png"))}
+                            resizeMode='center'/>
                         </View>
                         <View style={style.btnBlock}>{props.isOverTime?
                             (<>
@@ -103,7 +179,7 @@ function ResultOpenModal(props){
                             </>):(<>
                                 <TouchableOpacity activeOpacity={0.8} onPress={props.onBackButtonPress}>
                                 <View style={style.btn}>
-                                    <Text>我會再努力</Text>
+                                    <Text style={style.textBtn}>我會再努力</Text>
                                 </View>
                             </TouchableOpacity>
                             </>)}
@@ -154,8 +230,8 @@ const style = StyleSheet.create({
         textAlign:'center',
         fontSize:28
     },petShow:{
-        flex:3,
-        borderWidth:1
+        flex:4,
+        margin:5,
     },textBlockIfOpen:{
         flex:1,
     },textIfOpen:{
@@ -179,7 +255,7 @@ const style = StyleSheet.create({
         color:'#F2D9E8',
     },title:{
         paddingTop:10,
-        flex:1
+        flex:0.5
     },textTitle:{
         fontSize:28,
         textAlign:'center'

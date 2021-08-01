@@ -1,4 +1,4 @@
-import {useState,useEffect,useContext} from 'react';
+import React, {useState,useEffect,useContext} from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, TouchableHighlight, Image } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import { delay } from '../utils/utils'
@@ -75,7 +75,7 @@ function DragonQuestions({navigation}){
     const [disabled, setDisabled] = useState(false)
     const [showQuestion, setShowQuestion] = useState(true)
     // image
-    const [petImage,setPetImage] = useState(require('../image/pets/water/W3.png'))
+    const [petImage,setPetImage] = useState('')
     const [pet,setPet] = useState()
     useEffect(()=>{
         let l = userSettings.petList

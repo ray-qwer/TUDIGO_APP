@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { StyleSheet, Text, View, FlatList,TouchableOpacity, Image, AsyncStorage } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import globalStyle from '../styles/globalStyle'
@@ -41,7 +41,7 @@ function BookPage({ navigation }){
 
     const Item = ({item}) =>(
         <View style={style.Item}>
-            <Image style={{flex:1}} source={item.source} resizeMode='center'/> 
+            <Image style={{flex:1,width:"100%",height:"100%"}} source={item.source} resizeMode='center'/> 
         </View>
     );
     const renderItem = ({ item }) =>(
@@ -58,7 +58,7 @@ function BookPage({ navigation }){
                             />
                         </View>
                     </TouchableOpacity>
-                <Text style={style.headerText}>illustrate</Text>
+                <Text style={style.headerText}>圖鑑</Text>
             </View>
             <View style={style.flatListOfBook}>
                 <FlatList
@@ -99,7 +99,6 @@ const style = StyleSheet.create({
         margin:10,
         padding:10,
         borderColor:'#FFF',
-        borderWidth:1,
         justifyContent:"center",
         alignItems:"center",
     },

@@ -15,7 +15,8 @@ const image = {
     w4:require('../image/pets/water/W4.png'),
     ef:require('../image/spinEgg/egg_fire.png'),
     et:require('../image/spinEgg/egg_tree.png'),
-    ew:require('../image/spinEgg/egg_water.png'),    
+    ew:require('../image/spinEgg/egg_water.png'),   
+    eq:require('../image/spinEgg/eq.png') 
 }
 
 export default image;

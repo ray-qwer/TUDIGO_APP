@@ -1,18 +1,19 @@
-import {useState,useEffect,useContext } from 'react';
+import React, {useState,useEffect,useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, TouchableHighlight, AsyncStorage,Image } from 'react-native';
 import globalStyle from '../styles/globalStyle'
 import { Ionicons } from '@expo/vector-icons';
 import AppContext from '../utils/ReducerContext'
 import { CoinIcon } from './littleCom';
+import imageReq from '../utils/images'
 
-function Daily({navigation}){
-
+function Daily({ route, navigation}){
+    const { pet } = route.params;
     const [topic,setTopic] = useState("今天有吃蔬菜嗎")
     const [idealAns, setIdealAns] = useState(true)
     const [submit,setSubmit] = useState(false)
     const [suc,setSuc] = useState(false)
     const userSettings = useContext(AppContext)
-    const [petImage,setPetImage] = useState(require('../image/pets/tree/T4.png'))
+    // const [petImage,setPetImage] = useState(require('../image/pets/tree/T4.png'))
     const checkSuc = async(ans) =>{
         setSubmit(true)
         if(ans === idealAns){
@@ -38,7 +39,7 @@ function Daily({navigation}){
                 </View>
                 <View style={style.body}>
                     <View style={style.showPet}>
-                        <Image style={{height:'100%',width:'100%'}}source={petImage}
+                        <Image style={{height:'100%',width:'100%'}}source={imageReq[pet.source]}
                             resizeMode='center'/>
                     </View>
                 </View>
