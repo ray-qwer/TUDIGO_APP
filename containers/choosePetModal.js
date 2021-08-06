@@ -91,16 +91,25 @@ function ChoosePetModal(props){
         // used function passed in by homePage (props.setPet)
         // object pet??
         let p = {id:0,attribute:0}
+        let level;
         if(isPet && pets.length !== 0){
             p = {id:pets[petsId].id, attribute:pets[petsId].attribute}
+            level = pets[petsId].level
         } else if (eggs.length !== 0){
             p.attribute = eggs[eggsId].attribute
+            level = eggs[eggsId].level
         }
+        console.log('level',level)
+        if (p.id === userSettings.selectedPet.id && p.attribute === userSettings.selectedPet.attribute) return
         userSettings.setSelectedPet(p)
-        await AsyncStorage.setItem('selectedPet',JSON.stringify(p))
-        // time reset
+        // time reset 
         let time = ((userSettings.period.minute*60)+(userSettings.period.hour*3600)+(userSettings.period.day*86400))*1000;
-        props.setDueTime(time+Date.now())        
+        let minPeriod =  Math.min((level+4)*3600000,3*86400000)
+        if (time<minPeriod){
+            console.log('minPeriod')
+            props.setDueTime(minPeriod+Date.now())
+        }
+        else props.setDueTime(time+Date.now())        
     }
 
     return(

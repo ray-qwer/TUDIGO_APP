@@ -4,57 +4,13 @@ import globalStyle from '../styles/globalStyle'
 import { delay } from '../utils/utils'
 import AppContext from '../utils/ReducerContext'
 import imageReq from '../utils/images'
+import data from '../utils/questionJson.json'
 function DragonQuestions({navigation}){
     // variables of question, answers
     // options are set as 4 for all questions
     const userSettings = useContext(AppContext)
     let optionStyle = style.option;
-    const [question,setQuestion] = useState([
-        {
-            topic:"first question",
-            ans:3,
-            options:[
-                {
-                    id:1,
-                    words:"ans1",
-                },
-                {
-                    id:2,
-                    words:"ans2",
-                },
-                {
-                    id:3,
-                    words:"ans3",
-                },
-                {
-                    id:4,
-                    words:"ans4",
-                },
-            ] 
-        },
-        {
-            topic:'second question but it is a little bit long so that it needs two lines',
-            ans:2,
-            options:[
-                {
-                    id:1,
-                    words:"ans1",
-                },
-                {
-                    id:2,
-                    words:"ans2",
-                },
-                {
-                    id:3,
-                    words:"ans3",
-                },
-                {
-                    id:4,
-                    words:"ans4",
-                },
-            ] 
-        },
-    ])
+    const [question,setQuestion] = useState(null)
     const [options, setOptions] = useState([])
     const [topic, setTopic] = useState('')
 
@@ -81,22 +37,48 @@ function DragonQuestions({navigation}){
         let l = userSettings.petList
         let p = l.find(ele => ele.id === userSettings.selectedPet.id && ele.attribute === userSettings.selectedPet.attribute)
         setPet(p)
+        let blood = Math.floor((p.level/10+1)*100)
+        setPetBlood(blood)
+        setPetOriginBlood(blood)
+        let DBlood = (Math.floor(p.level/10)+1)*100
+        setDragonBlood(DBlood)
+        setDragonOriginBlood(DBlood)
         setPetImage(imageReq[p.source])
     },[])
     useEffect(()=>{
         // fetch Question from server
         const fetchQuestion=async()=>{
-            console.log(question.length)
-            setQuestionById(0)
+            let Q = []
+            let num =[]
+            let i = 0;
+            while(i<10){
+                let randomNum = Math.floor(Math.random()*data.length)
+                if (num.findIndex(n=>n === randomNum) === -1){
+                    num.push(randomNum)
+                    Q.push(data[randomNum])
+                    console.log(i)
+                    i = i+1
+                }
+            }
+            console.log(2)
+            setQuestion(Q)
         }
-        const setOriginBlood = async() =>{
-            // check which pet
-            setPetOriginBlood(100)
-            setDragonOriginBlood(100)
-        }
+        // const setOriginBlood = async() =>{
+        //     // check which pet
+        //     setPetOriginBlood(100)
+        //     setDragonOriginBlood(100)
+        // }
+        console.log(data.length)
+        // console.log(data[0])
         fetchQuestion()
-        setOriginBlood()
     },[])
+    useEffect(()=>{
+        if (question !== null){
+            setQuestionById(0)
+            console.log('hi')
+        }
+    },[question])
+
     
     const setQuestionById = async(id) =>{
         setOptions(question[id].options)
@@ -111,20 +93,43 @@ function DragonQuestions({navigation}){
         setDisabled(true)
         setShowQuestion(false)
         // TODO: attack logic
+        let pbd =petBlood
+        let dbd = dragonBlood
         if (id !== ans){
-            setPetBlood(petBlood - 10)
+            let defense = 0;
+            if (pet.id !== 0){
+                if (pet.attribute === 1){
+                    defense = Math.floor((pet.level/10+1)*8)
+                }
+            }
+            pbd = Math.max(petBlood - Math.ceil((pet.level+1)/10)*30+defense,0)
+            setPetBlood(pbd)
             setWhoAttack(1)
         } else {
-            setDragonBlood(dragonBlood - 10)
+            let attack = Math.floor(((pet.level/10)+1)*30);
+            
+            switch(pet.attribute){
+                case 0: attack = 30;break;
+                case 1: break;
+                case 2: attack = Math.floor(attack*1.2);break;
+                case 3: break;
+                default: break;
+            }
+            dbd = Math.max((dragonBlood - attack),0)
+            setDragonBlood(dbd)
             setWhoAttack(0)
         }
         // animation
         await delay(1000)
         console.log(pId)
         let pIdNext = pId + 1 
-        if (petBlood <= 0) {
+        if (pbd <= 0) {
             // defeated
             navigation.navigate('FightDragonResult',{Result:false})
+            return
+        }
+        if (dbd <= 0) {
+            navigation.navigate('FightDragonResult', { Result:true })
             return
         }
         if (pIdNext === question.length){
@@ -132,6 +137,16 @@ function DragonQuestions({navigation}){
             navigation.navigate('FightDragonResult',{Result:true})
             return 
         }
+        // recover logic
+        if (pet.id !== 0){
+            if (pet.attribute === 3){
+                if (petBlood < petOriginBlood){
+                    
+                    setPetBlood(Math.min((petBlood + Math.floor(pet.level/10)*8),petOriginBlood))
+                }
+            }
+        }
+        //
         console.log(pIdNext)
         setDisabled(false)
         setShowQuestion(true)
@@ -158,13 +173,15 @@ function DragonQuestions({navigation}){
         underlayColor="#918070"
         disabled={disabled}
         >
-            <Text style={{fontSize:32}}>{op.words}</Text>
+            <Text adjustsFontSizeToFit style={{fontSize:20,textAlign:'center'}}>{op.words}</Text>
         </TouchableHighlight>
     ));
 
     return(
         <View style={globalStyle.containerBackground}>
-            <View style={globalStyle.container}>
+            <View style={globalStyle.container}>{
+                question === [] ? (<></>):(
+                <>
                 <View style={style.header}>
                     <View style={style.petHPBlock}>
                         <Text style={{textAlign:'center'}}>Pet</Text>
@@ -192,7 +209,7 @@ function DragonQuestions({navigation}){
                 <View style={style.body}>
                     <View style={style.questionPart}>{showQuestion&&
                         <View style={style.questionWindow}>
-                            <Text style={style.questionText}>{topic}</Text>
+                            <Text style={style.questionText} adjustsFontSizeToFit>{topic}</Text>
                         </View>
                     } 
                     </View>
@@ -214,7 +231,8 @@ function DragonQuestions({navigation}){
                         <AnswerOption/>
                     </View>
                 </View>
-                {/* no home icon */}
+                </>
+                )}
             </View>
         </View>
     );
@@ -265,9 +283,9 @@ const style = StyleSheet.create({
         top:2,
     },
     questionPart:{
-        flex:1,
+        flex:2,
         paddingHorizontal:20,
-        paddingVertical:5
+        paddingVertical:6
     },
     questionWindow:{
         borderWidth:5,
@@ -289,13 +307,13 @@ const style = StyleSheet.create({
     pet:{
         flex:2,
         borderColor:'brown',
-        padding:10,
+        padding:0,
         justifyContent:'center'
     },
     dragon:{
         flex:3,
         borderColor:'brown',
-        padding:10,
+        padding:0,
         justifyContent:'center',
     },
     answerContainer:{
@@ -312,7 +330,8 @@ const style = StyleSheet.create({
         justifyContent:'center',
         alignItems:'center',
         backgroundColor:"#D1C0B0",
-        borderRadius:8,
+        borderRadius:5,
+        padding:5,
     }
 })
 

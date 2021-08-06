@@ -11,10 +11,9 @@ function OpenBoxModal(props){
     
     useEffect(()=>{
         // console.log(props.isVisible)
-        if(props.isVisible){
-            console.log(props.pet)
-            setPetImage(imageReq[props.pet.source])
-        }
+        if(!props.isVisible) return
+        console.log('why1')
+        setPetImage(imageReq[props.pet.source])
     },[props.isVisible])
     return(
         <Modal isVisible={props.isVisible} onBackdropPress={props.onBackdropPress} onBackButtonPress={props.onBackButtonPress}>
@@ -61,13 +60,14 @@ function ResultOpenModal(props){
     },[props.isVisible])
     useEffect(()=>{
         if (!props.isVisible) return
+        console.log('why2')
         const setAsyncStoragePetList = async() =>{
-            console.log(props.petList)
             await AsyncStorage.setItem('petList',JSON.stringify(props.petList))
         }
-        const setAsyncStorageSelectedPet = async(selectedPet) =>{
-            await AsyncStorage.setItem('selectedPet',JSON.stringify(selectedPet))
-        } 
+        
+        // const setAsyncStorageSelectedPet = async(selectedPet) =>{
+        //     await AsyncStorage.setItem('selectedPet',JSON.stringify(selectedPet))
+        // } 
 
         if(props.isOverTime){
             let p = props.pet
@@ -101,7 +101,7 @@ function ResultOpenModal(props){
                     p.source = src
                     p.level += 1
                     p.attribute = attribute
-                    setAsyncStorageSelectedPet({id:p.id,attribute:p.attribute})
+                    // setAsyncStorageSelectedPet({id:p.id,attribute:p.attribute})
                     props.onPetChange({id:id,attribute:attribute})
                 } else {
                     let tmpP = {
@@ -115,6 +115,7 @@ function ResultOpenModal(props){
                             recover: 10,
                         },
                         amount: 1,
+                        exp:0,
                     }
                     p.amount -= 1
                     let newPetList;
@@ -125,11 +126,18 @@ function ResultOpenModal(props){
                     else newPetList = props.petList
                     props.onPetListChange([...newPetList,tmpP])
                     props.onPetChange({id:tmpP.id,attribute:tmpP.attribute})
-                    setAsyncStorageSelectedPet({id:tmpP.id,attribute:tmpP.attribute})
+                    // setAsyncStorageSelectedPet({id:tmpP.id,attribute:tmpP.attribute})
                 }
             } else {
-                // level up
-                p.level +=1
+                // exp up
+                // check if level up
+                // level: 500*Math.ceil(level/10)
+                let levelUpgrade = 500*Math.ceil(p.level/10)
+                p.exp += 500
+                if (p.exp === levelUpgrade){
+                    p.level +=1
+                    p.exp = 0
+                }
                 setPetImage(imageReq[p.source])
             }
         }

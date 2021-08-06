@@ -25,6 +25,9 @@ function DragonResult({route,navigation}){
             setChance(chanceToday)
         }
         fetchLocalData()
+        if(Result){
+            userSettings.setMoney(userSettings.money+50)
+        }
     },[])
 
     return(

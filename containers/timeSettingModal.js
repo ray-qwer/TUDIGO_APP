@@ -12,10 +12,15 @@ function TimeSettingModal(props){
     const [hour,setHour] = useState('0');
     const [minute,setMinute] = useState('0');
     const onConfirm = async() =>{
+        let level = props.pet.level
+        let minPeriod = Math.min((level+4)*3600000,3*24*3600000)
         let period = {day:parseInt(day,10),hour:parseInt(hour,10),minute:parseInt(minute,10)}
+        let time = ((period.minute*60)+(period.hour*3600)+(period.day*86400))*1000;
+        if( time < minPeriod ) {
+            period = {day:Math.floor(minPeriod/86400000),hour:Math.floor((minPeriod%86400000)/3600000),minute:(minPeriod%86400000%3600000)/60000}    
+        }
         await AsyncStorage.setItem('period',JSON.stringify(period))
         userSettings.setPeriod(period)
-        let time = ((period.minute*60)+(period.hour*3600)+(period.day*86400))*1000;
         props.setDueTime(Date.now()+time);
         props.setShowTimeSettingModal(false);
     }

@@ -6,10 +6,10 @@ import { Ionicons } from '@expo/vector-icons';
 import AppContext from '../utils/ReducerContext'
 import imageReq from '../utils/images'
 
-function SpinResult({navigation}){
+function SpinResult({navigation,route}){
     const [rewardSrc, setRewardSrc ] = useState()
     const userSettings = useContext(AppContext)
-    const { attribute } = userSettings
+    const { attribute } = route.params
     useEffect(()=>{
         const saveData = async() =>{
             // random 
@@ -18,6 +18,7 @@ function SpinResult({navigation}){
             let index = userSettings.petList.findIndex(ele => ele.id === 0 && ele.attribute === attribute)
             if (index === -1){
                 let src;
+                console.log(attribute)
                 if(attribute === 1) src = 'ew'
                 else if (attribute === 2) src = 'ef'
                 else src = 'et'
@@ -32,10 +33,12 @@ function SpinResult({navigation}){
                         recover:    0,
                     },
                     amount: 1, // only for eggs
+                    exp:0,
                 }
-                userSettings.petList.push(p)
+                userSettings.setPetList([...userSettings.petList,p])
+                console.log(src)
                 setRewardSrc(imageReq[src])
-                await AsyncStorage.setItem('petList',JSON.stringify(userSettings.petList))
+                // await AsyncStorage.setItem('petList',JSON.stringify(userSettings.petList))
                 return
             }
             else{

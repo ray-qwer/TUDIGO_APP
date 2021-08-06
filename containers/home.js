@@ -29,16 +29,11 @@ function HomePage({navigation}){
     const [overDueTime, setOverDueTime] = useState(false) // check if successfully pass the challenge
     // render home page // object from local variable
     const [exp, setExp] = useState(50)
-    const [fullExp, setFullExp] = useState(100)
     const [selectedPet, setSelectedPet] = useState(null)
     // 
     const userSettings = useContext(AppContext)
     const {dueTime, setDueTime} = userSettings
 
-    const setAsyncStorageDueTime = async(time) =>{
-        await AsyncStorage.setItem('dueTime',JSON.stringify(time))
-        setDueTime(time)
-    }
     useEffect(()=>{
         console.log(LastTime)
         const countDown = setInterval(function t(){
@@ -108,33 +103,46 @@ function HomePage({navigation}){
         else setOverDueTime(false)
         setShowOpenBoxModal(false)
         setShowResultOpenModal(true)
-        let time = ((userSettings.period.minute*60)+(userSettings.period.hour*3600)+(userSettings.period.day*86400))*1000;
-        setDueTime(Date.now()+time)
-        await AsyncStorage.setItem('dueTime',JSON.stringify(Date.now()+time))
+        
+    }
+    const resultOpenBox_resetTime = () =>{
+        console.log('hi1')
+        let level = selectedPet.level
+        let minPeriod =  Math.min((level+4)*3600000,3*24*3600000);
+        let time = ((userSettings.period.minute*60)+(userSettings.period.hour*3600)+(userSettings.period.day*86400))*1000;        
+        if( time < minPeriod ){
+            setDueTime(minPeriod+Date.now())
+        } else {
+            setDueTime(time+Date.now())
+        }
+        console.log('hi2')
+        setShowResultOpenModal(false)
     }
 
     return(
         <View style={globalStyle.containerBackground}>
         <View style={globalStyle.container}>
             <SettingModal isVisible={showSettingModal} onBackdropPress={() => {setShowSettingModal(false)}} 
-                onBackButtonPress={()=>{setShowSettingModal(false)}}
+                onBackButtonPress={()=>{setShowSettingModal(false)}} resetTime={()=>{setDueTime(Date.now())}}
+                addMoney={()=>{userSettings.setMoney(userSettings.money +100000)}}
             />
             <TimeSettingModal isVisible={showTimeSettingModal} onBackdropPress={() => {setShowTimeSettingModal(false)}} 
-                onBackButtonPress={()=>{setShowTimeSettingModal(false)}} setDueTime={setAsyncStorageDueTime} setShowTimeSettingModal={setShowTimeSettingModal}
+                onBackButtonPress={()=>{setShowTimeSettingModal(false)}} setDueTime={setDueTime} setShowTimeSettingModal={setShowTimeSettingModal}
+                pet={selectedPet}
             />
-            <OpenBoxModal isVisible={showOpenBoxModal} onBackdropPress={() => {setShowOpenBoxModal(false)}} 
+            <OpenBoxModal isVisible={showOpenBoxModal} onBackdropPress={()=>{setShowOpenBoxModal(false)}} 
                 onBackButtonPress={()=>{setShowOpenBoxModal(false)}} onOpen={()=>{onOpen()}}
                 pet={selectedPet} 
             />
             <AlertModal isVisible={showAlertModal} onBackdropPress={() => {setShowAlertModal(false)}} 
                 onBackButtonPress={()=>{setShowAlertModal(false)}} content={alertMsg}
             />
-            <ResultOpenModal isVisible={showResultOpenModal} onBackdropPress={() => {setShowResultOpenModal(false)}} 
-                onBackButtonPress={()=>{setShowResultOpenModal(false)}} isOverTime={overDueTime}
+            <ResultOpenModal isVisible={showResultOpenModal} onBackdropPress={resultOpenBox_resetTime} 
+                onBackButtonPress={resultOpenBox_resetTime} isOverTime={overDueTime}
                 pet={selectedPet} onPetListChange={userSettings.setPetList} petList={userSettings.petList} onPetChange={userSettings.setSelectedPet}
             />
             <ChoosePetModal isVisible={showChoosePetModal} onBackdropPress={() => {setShowChoosePetModal(false)}} 
-                onBackButtonPress={()=>{setShowChoosePetModal(false)}}  setDueTime={setAsyncStorageDueTime}
+                onBackButtonPress={()=>{setShowChoosePetModal(false)}}  setDueTime={setDueTime}
             />
             <View style={style.header}>
                 {/* header part */}
@@ -161,7 +169,7 @@ function HomePage({navigation}){
                     {/* show level */}
                     <Text style={style.showLevelText}>Lv.{(selectedPet!==null)?(selectedPet.level.toString()):('0')}</Text>
                     <View style={style.showLevelOutlined}>
-                        <View style={[style.showLevelColor,selectedPet!==null && {width:(exp/fullExp*100).toString()+'%'}]}></View>
+                        <View style={[style.showLevelColor,selectedPet!==null && {width:(selectedPet.exp/(Math.floor(selectedPet.level/10+1)*500)*100).toString()+'%'}]}></View>
                     </View>
                 </View>
                 <View style={style.showPet}>
@@ -224,7 +232,7 @@ function HomePage({navigation}){
                             />
                         </View>
                         <View style={{flex:1}}>
-                            <Text style={{...style.textSub}}>勇闖巨龍</Text>
+                            <Text adjustsFontSizeToFit style={{...style.textSub}}>勇闖巨龍</Text>
                         </View>
                     </TouchableOpacity>
                 </View>

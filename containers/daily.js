@@ -19,7 +19,7 @@ function Daily({ route, navigation}){
         if(ans === idealAns){
             setSuc(true)
             // reward
-            userSettings.setMoney(userSettings.money+10)
+            userSettings.setMoney(userSettings.money+100)
             // set done time
             await AsyncStorage.setItem('DailyDone',Date.now().toString())
         }
@@ -29,7 +29,8 @@ function Daily({ route, navigation}){
         <View style={globalStyle.containerBackground}>
             <View style={globalStyle.container}>
                 <View style={style.dailyChallenge}>
-
+                    <Image style={{height:'100%',width:'100%',position:'absolute'}} source={require('../image/dailyRing.png')}/>
+                    <Text style={{textAlign:'center',transform:[{rotate:'10deg'}],fontSize:30,lineHeight:35}}>每日{`\n`}任務</Text>
                 </View>
                 <View style={style.header}>
                     <View style={globalStyle.money}>
@@ -88,12 +89,11 @@ const style = StyleSheet.create({
     },
     dailyChallenge:{
         position:'absolute',
-        height:150,
-        width:150,
+        height:180,
+        width:180,
         right:10,
         top:10,
-        borderColor:'white',
-        borderWidth:10,
+        justifyContent:'center'
     },
     question:{
         flex:1,

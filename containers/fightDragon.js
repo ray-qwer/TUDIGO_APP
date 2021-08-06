@@ -15,13 +15,13 @@ function FightDragon({navigation}){
         console.log("start");
         // TODO: check if has right
         // Be Careful!!!neeed to put below back
-        navigation.navigate('FightDragonQuestion')
         if(chance === 0){
             setShowMsg(true)
-            await delay(1000)
+            await delay(2000)
             setShowMsg(false);
             return;
         } 
+        navigation.navigate('FightDragonQuestion')
         await AsyncStorage.setItem('@fightDragon/chance',(chance -1).toString())
         await AsyncStorage.setItem('@fightDragon/prevTime',Date.now().toString())
         setChance(chance-1)

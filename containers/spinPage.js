@@ -12,7 +12,7 @@ function SpinPage({navigation}){
     const [price, setPrice] = useState(1000);
     const [modalVisible, setModalVisible] = useState(false)
     const [ifSelect, setIfSelect] = useState(false)
-    let attri = 0;
+    const [attri, setAttri] = useState(0)
     const goSpinResult = () =>{
         if(userSettings.money < price){
             setModalVisible(true);
@@ -21,11 +21,11 @@ function SpinPage({navigation}){
         else{
             userSettings.setMoney(userSettings.money - price)
         }
+        console.log('attri',attri)
         navigation.navigate("SpinResult",{attribute:attri})
-        setIfSelect(false)
     }
     const onSelectAttri= (a) =>{
-        attri = a
+        setAttri(a)
         setIfSelect(true)
         console.log(attri)
     }
@@ -69,22 +69,30 @@ function SpinPage({navigation}){
                             <Text style={style.Text}>{price}</Text>
                         </View>
                         </>
-                    ):(
+                    ):( <>
+                        <Text style={style.title}>選擇屬性</Text>
                         <View style={style.AttriWindow}>
                             <View style={{flexDirection:'row',}}>
                                 <TouchableOpacity style={style.selectAttri} onPress={()=>{onSelectAttri(2)}}>
-                                    <Text>Fire</Text>
+                                    <Image style={{height:'100%',width:'100%'}} source={require('../image/spinEgg_fire.png')}
+                                        resizeMode='center'
+                                    />
                                 </TouchableOpacity>
                                 <TouchableOpacity style={style.selectAttri} onPress={()=>{onSelectAttri(1)}}>
-                                    <Text>Water</Text>
+                                    <Image style={{height:'100%',width:'100%'}} source={require('../image/spinEgg_water.png')}
+                                        resizeMode='center'
+                                    />
                                 </TouchableOpacity>
                             </View>
                             <View>
                                 <TouchableOpacity style={style.selectAttri} onPress={()=>{onSelectAttri(3)}}>
-                                    <Text>Tree</Text>
+                                    <Image style={{height:'100%',width:'100%'}} source={require('../image/spinEgg_tree.png')}
+                                        resizeMode='center'
+                                    />
                                 </TouchableOpacity>
                             </View>
                         </View>
+                        </>
                     )}
                 </View>
                 <View style={style.root}>
@@ -125,7 +133,6 @@ const style = StyleSheet.create({
         alignItems:'center'
     },
     selectAttri:{
-        borderWidth:1,
         height:110,
         width:110,
         margin:10
@@ -170,6 +177,12 @@ const style = StyleSheet.create({
         textAlign:'center',
         color:"#a27762",
         margin:10
+    },title:{
+        fontSize:50,
+        margin:10,
+        position:'absolute',
+        top:10,
+        color:'#571614'
     }
 })
 

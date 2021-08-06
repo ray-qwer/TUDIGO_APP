@@ -16,6 +16,7 @@
 //             defend:     number,
 //             recover:    number,
 //         },
+//         blood: number?
 //         amount: number, // only for eggs
 //     }
 // ]    
@@ -38,29 +39,61 @@ export default function App() {
   const [petList, setPetList] = useState([])
   const [selectedPet, setSelectedPet] = useState(null)
   const [dueTime, setDueTime] = useState(0)
-  const userSettings = {
-    money:money,
-    setMoney:setMoney,
-    period:period,
-    setPeriod:setPeriod,
-    petList:petList,
-    setPetList:setPetList,
-    selectedPet: selectedPet,
-    setSelectedPet: setSelectedPet,
-    dueTime: dueTime,
-    setDueTime: setDueTime,
-  }
-
+  
   useEffect(()=>{
     const fetchData = async() =>{
+      // await AsyncStorage.clear()
       await fetchPeriod()
       await fetchPetList()
       await fetchSelectedPet()
       await fetchDueTime()
+      await fetchMoney()
       setLoading(false)
     }
     fetchData()
   },[])
+  
+  const setMoneyAsyncStorage = async(m) =>{
+    await AsyncStorage.setItem('money',JSON.stringify(m))
+    setMoney(m)
+  }
+  const setPeriodAsyncStorage = async(p) =>{
+    await AsyncStorage.setItem('period',JSON.stringify(p))
+    setPeriod(p)
+  }
+  const setPetListAsyncStorage = async(p) =>{
+    await AsyncStorage.setItem('petList',JSON.stringify(p))
+    setPetList(p)
+  }
+  const setDueTimeAsyncStorage = async(d) =>{
+    await AsyncStorage.setItem('dueTime',JSON.stringify(d))
+    setDueTime(d)
+  }
+  const setSelectedPetAsyncStorage = async(s) =>{
+    await AsyncStorage.setItem('selectedPet',JSON.stringify(s))
+    setSelectedPet(s)
+  }
+  const userSettings = {
+    money:money,
+    setMoney:setMoneyAsyncStorage,
+    period:period,
+    setPeriod:setPeriodAsyncStorage,
+    petList:petList,
+    setPetList:setPetListAsyncStorage,
+    selectedPet: selectedPet,
+    setSelectedPet: setSelectedPetAsyncStorage,
+    dueTime: dueTime,
+    setDueTime: setDueTimeAsyncStorage,
+  }
+  const fetchMoney = async() =>{
+    let m = await AsyncStorage.getItem('money')
+    if( m !== null ){
+      m = JSON.parse(m)
+      setMoney(m)
+    } else {
+      setMoney(100000)
+    }
+  }
 
   const fetchDueTime = async() =>{
     let d = await AsyncStorage.getItem('dueTime')
@@ -103,6 +136,7 @@ export default function App() {
                 recover: 0,
             },
             amount: 1,
+            exp:0
       }]
       await AsyncStorage.setItem('petList',JSON.stringify(p))
       setPetList(p)
