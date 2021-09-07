@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, TouchableHighlight, Image } f
 import globalStyle from '../styles/globalStyle'
 import { delay } from '../utils/utils'
 import AppContext from '../utils/ReducerContext'
+// import imageReq from '../utils/animate'
 import imageReq from '../utils/images'
 import data from '../utils/questionJson.json'
 function DragonQuestions({navigation}){
@@ -121,7 +122,6 @@ function DragonQuestions({navigation}){
         }
         // animation
         await delay(1000)
-        console.log(pId)
         let pIdNext = pId + 1 
         if (pbd <= 0) {
             // defeated
@@ -140,9 +140,8 @@ function DragonQuestions({navigation}){
         // recover logic
         if (pet.id !== 0){
             if (pet.attribute === 3){
-                if (petBlood < petOriginBlood){
-                    
-                    setPetBlood(Math.min((petBlood + Math.floor(pet.level/10)*8),petOriginBlood))
+                if (pbd < petOriginBlood){
+                    setPetBlood(Math.min((pbd + (Math.floor(pet.level/10)+1)*5),petOriginBlood))
                 }
             }
         }
@@ -156,7 +155,7 @@ function DragonQuestions({navigation}){
 
     const btnBorderColor = (id) =>{
         if (id === yourAns && id === ans){
-            optionStyle = {...style.option,borderWidth:5,borderColor:"green"}
+            optionStyle = {...style.option,borderWidth:5,borderColor:"#5E904E"}
         }
         else if(id === yourAns){
             optionStyle = {...style.option, borderWidth:5,borderColor:"darkred"}
@@ -218,11 +217,20 @@ function DragonQuestions({navigation}){
                         {/* where put pet */}
                             <Image style={{height:'50%',width:'100%'}}source={petImage}
                             resizeMode='center' />
+                            {/* <LottieView  ref={animation => {
+                            this.pet_animation = animation;}}
+                            style={{height:'70%',width:'70%'}}source={petImage}
+                            resizeMode='center' /> */}
                         </View>
                         <View style={style.dragon}>
                         {/* where put dragon */}
                             <Image style={{height:'70%',width:'100%'}}source={require('../image/dragon/d1.png')}
                             resizeMode='center'/>
+                        {/* <LottieView  ref={animation => {
+                            this.drangon_animation = animation;}}
+                            style={{height:'75%',width:'75%'}}
+                            source={require('../animation/dragon.json')}
+                            resizeMode='center'/> */}
                         </View>
                     </View>
                 </View>
@@ -272,7 +280,7 @@ const style = StyleSheet.create({
     HPLast:{
         // try react-native-linear-gradient
         flex:1,
-        backgroundColor:'red',
+        backgroundColor:'#E60000',
         borderRadius:10,
         borderColor:'black',
         borderWidth:1,

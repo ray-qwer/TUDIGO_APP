@@ -59,16 +59,16 @@ function ResultOpenModal(props){
         if(props.isVisible) setPetImage(imageReq[props.pet.source])
     },[props.isVisible])
     useEffect(()=>{
-        if (!props.isVisible) return
-        console.log('why2')
         const setAsyncStoragePetList = async() =>{
             await AsyncStorage.setItem('petList',JSON.stringify(props.petList))
         }
-        
+        if (!props.isVisible) return
+        console.log('level1')
+        console.log(props.isOverTime)
         // const setAsyncStorageSelectedPet = async(selectedPet) =>{
         //     await AsyncStorage.setItem('selectedPet',JSON.stringify(selectedPet))
         // } 
-
+        
         if(props.isOverTime){
             let p = props.pet
             if (p.id === 0){

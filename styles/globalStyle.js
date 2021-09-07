@@ -7,7 +7,6 @@ const globalStyle = StyleSheet.create({
         borderRadius:16,
         backgroundColor: '#EFE8CC',
         overflow:"hidden"
-
     },
     containerBackground:{
         backgroundColor:'#D1C0B0',
@@ -23,7 +22,8 @@ const globalStyle = StyleSheet.create({
         padding:10,
         width:"45%",
         justifyContent:'center',
-        alignItems:'flex-end'        
+        alignItems:'flex-start',
+        paddingLeft:50,  
     },
     moneyText:{
         fontSize:30,

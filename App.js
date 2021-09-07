@@ -30,7 +30,8 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View,Dimensions, AsyncStorage } from 'react-native';
 import HomeStackNav from './routes/stackRoute'
 import AppContext from './utils/ReducerContext'
-
+import { Buffer } from 'buffer';
+global.Buffer = Buffer;
 export default function App() {
 
   const [money,setMoney] = useState(1000)
@@ -42,7 +43,7 @@ export default function App() {
   
   useEffect(()=>{
     const fetchData = async() =>{
-      // await AsyncStorage.clear()
+      await AsyncStorage.clear()
       await fetchPeriod()
       await fetchPetList()
       await fetchSelectedPet()
@@ -91,7 +92,7 @@ export default function App() {
       m = JSON.parse(m)
       setMoney(m)
     } else {
-      setMoney(100000)
+      setMoney(3000)
     }
   }
 

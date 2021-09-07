@@ -9,6 +9,7 @@ import { CoinIcon } from './littleCom'
 import { timeParse, checkIfOverADay } from '../utils/utils'
 import ChoosePetModal from './choosePetModal';
 import imageReq from '../utils/images'
+import BleScanModal from './bleScan'
 // TODO: add animation of navigation
 // https://reactnavigation.org/docs/stack-navigator/
 
@@ -22,6 +23,23 @@ function HomePage({navigation}){
     const [showAlertModal, setShowAlertModal] = useState(false)
     const [alertMsg, setAlertMsg] = useState("")
     const [showChoosePetModal, setShowChoosePetModal] = useState(false)
+    const [showBleScanModal, setShowBleScanModal] = useState(false)
+    // image
+    const open_off = require('../image/open-off.png')
+    const open_on = require('../image/open-on.png')
+    const [sethomeImg, newhomeImg] = useState(open_off)
+    const spinEgg_off = require('../image/spinEgg-off.png')
+    const spinEgg_on = require('../image/spinEgg-on.png')
+    const [setEggImg, newEggImg] = useState(spinEgg_off)
+    const setting_off = require('../image/setting-off.png')
+    const setting_on = require('../image/setting-on.png')
+    const [setsettingImg, newsettingImg] = useState(setting_off)
+    const fightDragon_off = require('../image/fightDragon-off.png')
+    const fightDragon_on = require('../image/fightDragon-on.png')
+    const [setDragonImg, newDragonImg] = useState(fightDragon_off)
+    const illustrate_off = require('../image/peticon-off.png')
+    const illustrate_on = require('../image/peticon-on.png')
+    const [setillustrateImg, newillustrateImg] = useState(illustrate_off)
     // countdown
     const [LastTime,setLastTime]  = useState(1);
     // const [dueTime,setDueTime] = useState(0)
@@ -76,7 +94,43 @@ function HomePage({navigation}){
     const openBoxMessage = () => {
         setShowOpenBoxModal(true)
     }
-
+    // press button effect 
+    const home_function = () =>{
+        newhomeImg(open_on)
+        setShowOpenBoxModal(true)
+       }
+    const home_function_back = () =>{
+         newhomeImg(open_off)
+         setShowOpenBoxModal(false)
+    }
+       
+    const spinEgg_function = async() =>{
+        newEggImg(spinEgg_on)
+        navigation.navigate('SpinEgg')
+        setTimeout(() => { newEggImg(spinEgg_off); }, 500);
+        
+    }
+    const setting_function = async() =>{
+        newsettingImg(setting_on)
+        setShowSettingModal(true)
+    }
+    const setting_function_back = async() =>{
+        newsettingImg(setting_off)
+        setShowSettingModal(false)
+    }
+    
+    const fightDragon_function = async() =>{
+        newDragonImg(fightDragon_on)
+        navigation.navigate('FightDragon')
+        setTimeout(() => { newDragonImg(fightDragon_off); }, 500);
+    }
+    
+    const illustrate_function = async() =>{
+        newillustrateImg(illustrate_on)
+        navigation.navigate('Book')
+        setTimeout(() => { newillustrateImg(illustrate_off); }, 500);
+    }
+    //
     const goDaily = async() =>{
         // DailyDone: string of time when answer the Daily challenge
         let ifDailyDone = await AsyncStorage.getItem('DailyDone')
@@ -102,10 +156,15 @@ function HomePage({navigation}){
         }
         else setOverDueTime(false)
         setShowOpenBoxModal(false)
+        setShowBleScanModal(true)
+        // setShowResultOpenModal(true)
+    }
+    const onOpenedBox = () =>{
+        setShowBleScanModal(false)
         setShowResultOpenModal(true)
-        
     }
     const resultOpenBox_resetTime = () =>{
+        setShowResultOpenModal(false)
         console.log('hi1')
         let level = selectedPet.level
         let minPeriod =  Math.min((level+4)*3600000,3*24*3600000);
@@ -116,22 +175,25 @@ function HomePage({navigation}){
             setDueTime(time+Date.now())
         }
         console.log('hi2')
-        setShowResultOpenModal(false)
     }
 
     return(
         <View style={globalStyle.containerBackground}>
         <View style={globalStyle.container}>
-            <SettingModal isVisible={showSettingModal} onBackdropPress={() => {setShowSettingModal(false)}} 
-                onBackButtonPress={()=>{setShowSettingModal(false)}} resetTime={()=>{setDueTime(Date.now())}}
+            <SettingModal isVisible={showSettingModal} onBackdropPress={setting_function_back} 
+                onBackButtonPress={setting_function_back} resetTime={()=>{setDueTime(Date.now())}}
                 addMoney={()=>{userSettings.setMoney(userSettings.money +100000)}}
+            />
+            <BleScanModal isVisible={showBleScanModal} 
+                 onSkipPress={onOpenedBox}
+                onOpenedBox={onOpenedBox}
             />
             <TimeSettingModal isVisible={showTimeSettingModal} onBackdropPress={() => {setShowTimeSettingModal(false)}} 
                 onBackButtonPress={()=>{setShowTimeSettingModal(false)}} setDueTime={setDueTime} setShowTimeSettingModal={setShowTimeSettingModal}
                 pet={selectedPet}
             />
-            <OpenBoxModal isVisible={showOpenBoxModal} onBackdropPress={()=>{setShowOpenBoxModal(false)}} 
-                onBackButtonPress={()=>{setShowOpenBoxModal(false)}} onOpen={()=>{onOpen()}}
+            <OpenBoxModal isVisible={showOpenBoxModal} onBackdropPress={home_function_back} 
+                onBackButtonPress={home_function_back} onOpen={()=>{onOpen()}}
                 pet={selectedPet} 
             />
             <AlertModal isVisible={showAlertModal} onBackdropPress={() => {setShowAlertModal(false)}} 
@@ -193,9 +255,9 @@ function HomePage({navigation}){
                 {/* root */}
                 <View style={style.spinEgg}>
                     {/* to spin egg */}
-                    <TouchableOpacity style={{flex:1,}} onPress={()=>navigation.navigate('SpinEgg')} activeOpacity={.7}>
+                    <TouchableOpacity style={{flex:1,}} onPress={spinEgg_function} activeOpacity={1}>
                         <View style={{flex:2,paddingHorizontal:2.5}}>
-                            <Image style={{height:'100%',width:'100%'}}source={require('../image/spinEgg.png')}
+                            <Image style={{height:'100%',width:'100%'}}source={setEggImg}
                             resizeMode='center'
                             />
                         </View>
@@ -204,9 +266,9 @@ function HomePage({navigation}){
                 </View>
                 <View style={style.illustrateBook}>
                     {/* to book */}
-                    <TouchableOpacity style={{flex:1}} onPress={()=>navigation.navigate('Book')} activeOpacity={.7}>
+                    <TouchableOpacity style={{flex:1}} onPress={illustrate_function} activeOpacity={1}>
                         <View style={{flex:2,paddingHorizontal:2.5}}>
-                            <Image style={{height:'100%',width:'100%'}}source={require('../image/illustrate.png')}
+                            <Image style={{height:'100%',width:'100%'}}source={setillustrateImg}
                             resizeMode='center'
                             />
                         </View>
@@ -215,9 +277,9 @@ function HomePage({navigation}){
                 </View>
                 <View style={{...style.openBox}}>
                     {/* open box */}
-                    <TouchableOpacity style={{ bottom:Dimensions.get('window').height*(0.8/9)}} onPress={()=>{openBoxMessage()}} activeOpacity={.7}>
+                    <TouchableOpacity style={{ bottom:Dimensions.get('window').height*(0.8/9)}} onPress={home_function} activeOpacity={1}>
                         <View style={{alignItems:'center'}} >
-                            <Image style={{height:'100%',width:'100%',}} source={require('../image/open.png')}
+                            <Image style={{height:'100%',width:'100%',}} source={sethomeImg}
                             resizeMode='center'
                             />
                         </View>
@@ -225,9 +287,9 @@ function HomePage({navigation}){
                 </View>
                 <View style={style.fightDragon}>
                     {/* fight with dragon */}
-                    <TouchableOpacity style={{flex:1}} onPress={()=>navigation.navigate('FightDragon')} activeOpacity={.7}>
+                    <TouchableOpacity style={{flex:1}} onPress={fightDragon_function} activeOpacity={1}>
                         <View style={{flex:2,paddingHorizontal:2.5}}>
-                            <Image style={{height:'100%',width:'100%'}} source={require('../image/fightDragon.png')}
+                            <Image style={{height:'100%',width:'100%'}} source={setDragonImg}
                             resizeMode='center'
                             />
                         </View>
@@ -238,9 +300,9 @@ function HomePage({navigation}){
                 </View>
                 <View style={style.setting}>
                     {/* setting */}
-                    <TouchableOpacity style={{flex:1}} onPress={()=>{clear();setShowSettingModal(true)}} activeOpacity={.7}>
+                    <TouchableOpacity style={{flex:1}} onPress={setting_function} activeOpacity={1}>
                         <View style={{flex:2,paddingHorizontal:2.5}}>
-                            <Image style={{height:'100%',width:'100%'}}source={require('../image/setting.png')}
+                            <Image style={{height:'100%',width:'100%'}}source={setsettingImg}
                             resizeMode='center'
                             />
                         </View>
