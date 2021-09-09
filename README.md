@@ -16,34 +16,52 @@ You should take a look at [here](https://reactnative.dev/docs/environment-setup)
 
 ## Demo
 **Main Theme**
-![](https://i.imgur.com/9ucF43j.png =50%x)
+
+<img src="https://i.imgur.com/9ucF43j.png" width="40%">
+
 
 **set waiting time**
-![](https://i.imgur.com/twJ4z4N.png =50%x)
+
+<img src="https://i.imgur.com/twJ4z4N.png" width="40%">
 
 **unlock the box**
-![](https://i.imgur.com/D6IThw6.png =50%x)
+
+<img src="https://i.imgur.com/D6IThw6.png" width="40%">
 
 **search ble lock**
-![](https://i.imgur.com/P9yQKAZ.png =50%x)
+
+<img src="https://i.imgur.com/P9yQKAZ.png" width="40%">
+
 
 **successful feeding**
-![](https://i.imgur.com/aCZvR6L.png =50%x)
+
+<img src="https://i.imgur.com/aCZvR6L.png" width="40%">
+
 
 **little game**
-![](https://i.imgur.com/QV6BKSk.png =50%x)
+
+<img src="https://i.imgur.com/QV6BKSk.png" width="40%">
+
 
 **spin egg**
-![](https://i.imgur.com/sCVn4Bg.png =50%x)
+
+<img src="https://i.imgur.com/sCVn4Bg.png" width="40%">
+
 
 **daily challenge**
-![](https://i.imgur.com/yhNnYFQ.png =50%x)
+
+<img src="https://i.imgur.com/yhNnYFQ.png" width="40%">
+
 
 **illustrate book**
-![](https://i.imgur.com/kqJEsrq.png =50%x)
+
+<img src="https://i.imgur.com/kqJEsrq.png" width="40%">
+
 
 **some easy setting**
-![](https://i.imgur.com/iejrDTR.png =50%x)
+
+<img src="https://i.imgur.com/iejrDTR.png" width="40%">
+
 
 You also can try this in [Figma](https://www.figma.com/proto/4LtYaCvattOQFN9BRi6irj/Untitled?page-id=0%3A1&node-id=1%3A23&viewport=241%2C48%2C0.25&scaling=scale-down&starting-point-node-id=1%3A23&show-proto-sidebar=1).
 ## Future work
