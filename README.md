@@ -70,7 +70,9 @@ Also, thank to pei-chou, the pets have animation now, but I have problem to add 
 
 ## Thanks List
 Design For Taiwan, DFT.
+
 Pei-Chou.
+
 Tudigo's members.
 
 ## others
