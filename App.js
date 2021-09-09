@@ -43,7 +43,7 @@ export default function App() {
   
   useEffect(()=>{
     const fetchData = async() =>{
-      await AsyncStorage.clear()
+      // await AsyncStorage.clear()
       await fetchPeriod()
       await fetchPetList()
       await fetchSelectedPet()
